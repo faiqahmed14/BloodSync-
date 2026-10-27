@@ -1,0 +1,27 @@
+# One-click setup on https://render.com  (New > Blueprint, pick this repository).
+# Secrets marked "sync: false" are asked for in the Render dashboard, never stored in Git.
+services:
+  - type: web
+    name: bloodsync
+    runtime: node
+    plan: free
+    buildCommand: cd bloodsync-backend && npm ci
+    startCommand: cd bloodsync-backend && node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 20
+      - key: MONGODB_URI
+        sync: false
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_CONTACT_EMAIL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: MAP_PROVIDER
+        value: osm

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 520" role="img" aria-label="A glowing blood drop with a heartbeat line and live alerts">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#d6302b" stop-opacity=".42"/><stop offset="1" stop-color="#d6302b" stop-opacity="0"/></radialGradient>
+    <linearGradient id="drop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7468"/><stop offset=".5" stop-color="#d6302b"/><stop offset="1" stop-color="#7d1f1c"/></linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="#f1ede6" fill-opacity=".09"/></pattern>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="6"/></filter>
+  </defs>
+  <style>
+    .ring{transform-origin:280px 285px;animation:ring 3.6s ease-out infinite;fill:none;stroke:#d6302b;stroke-width:2}
+    .ring.r2{animation-delay:1.2s}.ring.r3{animation-delay:2.4s}
+    @keyframes ring{0%{transform:scale(.55);opacity:.8}100%{transform:scale(1.55);opacity:0}}
+    .ecg{fill:none;stroke:#f1ede6;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1000;stroke-dashoffset:1000;animation:draw 3.2s ease-in-out infinite}
+    @keyframes draw{0%{stroke-dashoffset:1000}55%,100%{stroke-dashoffset:0}}
+    .chip{animation:float 5s ease-in-out infinite}.c2{animation-delay:-1.6s}.c3{animation-delay:-3.1s}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+    .beat{transform-origin:280px 285px;animation:beat 1.8s ease-in-out infinite}
+    @keyframes beat{0%,100%{transform:scale(1)}12%{transform:scale(1.045)}24%{transform:scale(1)}}
+    text{font-family:Inter,Arial,Helvetica,sans-serif}
+    @media (prefers-reduced-motion:reduce){.ring,.ecg,.chip,.beat{animation:none}.ecg{stroke-dashoffset:0}}
+  </style>
+  <rect width="560" height="520" fill="url(#dots)"/>
+  <circle cx="280" cy="285" r="250" fill="url(#glow)"/>
+  <circle class="ring" cx="280" cy="285" r="110"/><circle class="ring r2" cx="280" cy="285" r="110"/><circle class="ring r3" cx="280" cy="285" r="110"/>
+  <g class="beat">
+    <ellipse cx="280" cy="448" rx="92" ry="12" fill="#000" fill-opacity=".35" filter="url(#soft)"/>
+    <path d="M280 108C280 108 176 226 176 312a104 104 0 0 0 208 0C384 226 280 108 280 108Z" fill="url(#drop)"/>
+    <path d="M222 300c0-34 20-70 46-104-34 32-62 74-62 118a74 74 0 0 0 20 50c-3-20-4-42-4-64Z" fill="url(#shine)"/>
+    <circle cx="326" cy="372" r="9" fill="#fff" fill-opacity=".35"/>
+  </g>
+  <path id="ecgPath" class="ecg" d="M24 300H158L182 300L204 246L230 356L256 196L282 330L304 300H536"/>
+  <circle r="7" fill="#f1ede6"><animateMotion dur="3.2s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;.55;1" calcMode="linear"><mpath href="#ecgPath"/></animateMotion></circle>
+
+  <g class="chip"><rect x="24" y="92" width="196" height="50" rx="14" fill="#1c2127" stroke="#f1ede6" stroke-opacity=".16"/><circle cx="48" cy="117" r="7" fill="#d6302b"/><text x="64" y="115" font-size="13" font-weight="700" fill="#f1ede6">O- needed</text><text x="64" y="132" font-size="11" fill="#8b93a1">Civil Hospital, 2.1 km away</text></g>
+  <g class="chip c2"><rect x="344" y="168" width="196" height="50" rx="14" fill="#1c2127" stroke="#1b8a6b" stroke-opacity=".6"/><circle cx="368" cy="193" r="11" fill="#1b8a6b"/><path d="M362 193l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><text x="388" y="191" font-size="13" font-weight="700" fill="#f1ede6">Donor accepted</text><text x="388" y="208" font-size="11" fill="#8b93a1">Sharing live location</text></g>
+  <g class="chip c3"><rect x="40" y="420" width="178" height="50" rx="14" fill="#1c2127" stroke="#f1ede6" stroke-opacity=".16"/><path d="M62 436a8 8 0 0 1 16 0c0 8-8 15-8 15s-8-7-8-15Z" fill="#c9a227"/><circle cx="70" cy="436" r="3" fill="#1c2127"/><text x="88" y="443" font-size="13" font-weight="700" fill="#f1ede6">ETA 6 min</text><text x="88" y="460" font-size="11" fill="#8b93a1">On the way to you</text></g>
+  <g fill="#f1ede6" fill-opacity=".5"><path d="M470 82l4 10 10 4-10 4-4 10-4-10-10-4 10-4Z"/><path d="M500 360l3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/><path d="M96 230l3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/></g>
+</svg>

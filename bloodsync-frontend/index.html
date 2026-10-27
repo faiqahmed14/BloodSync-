@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BloodSync: Find Blood. Save a Life.</title>
+<meta name="description" content="BloodSync connects patients with nearby blood donors across Pakistan, matched by location and blood group, with live tracking.">
+<meta name="theme-color" content="#d6302b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BloodSync: Find Blood. Save a Life.">
+<meta property="og:description" content="One network of blood donors across Pakistan, matched by location and blood group, with live tracking.">
+<meta property="og:image" content="og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14181c;
+    --ink-2:#1c2127;
+    --paper:#f1ede6;
+    --paper-2:#e8e2d6;
+    --red:#d6302b;
+    --red-dim:#8a2622;
+    --green:#1b8a6b;
+    --amber:#c9a227;
+    --muted:#8b93a1;
+    --muted-dark:#5b6472;
+    --line:rgba(241,237,230,0.12);
+    --line-dark:rgba(20,24,28,0.12);
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:var(--font-body);
+    background:var(--ink);
+    color:var(--paper);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit; text-decoration:none;}
+  ul{list-style:none;}
+  button{font-family:inherit; cursor:pointer;}
+  input, select, textarea{font-family:inherit;}
+
+  .section{display:none; animation:fadeIn .5s ease;}
+  .section.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+
+  /* NAV */
+  header{
+    position:sticky; top:0; z-index:100;
+    background:rgba(20,24,28,0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .navbar{display:flex; align-items:center; justify-content:space-between; padding:18px 24px;}
+  .logo{
+    font-family:var(--font-display); font-weight:700; font-size:1.4rem;
+    display:flex; align-items:center; gap:8px; letter-spacing:-0.02em;
+  }
+  .logo-mark{width:28px; height:28px; flex:none; filter:drop-shadow(0 2px 8px rgba(226,58,51,0.45));}
+  nav.links{display:flex; gap:32px;}
+  nav.links a{
+    font-size:0.92rem; color:var(--muted); font-weight:500; padding:6px 2px;
+    border-bottom:2px solid transparent; transition:color .2s, border-color .2s;
+  }
+  nav.links a:hover, nav.links a.active{color:var(--paper); border-color:var(--red);}
+  .nav-actions{display:flex; align-items:center; gap:12px;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; justify-content:center;
+    padding:11px 20px; border-radius:6px; font-weight:600; font-size:0.88rem;
+    border:1px solid transparent; transition:transform .15s ease, background .2s, border-color .2s;
+    white-space:nowrap;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-red{background:var(--red); color:#fff;}
+  .btn-red:hover{background:#c02622;}
+  .btn-outline{border-color:var(--line); color:var(--paper); background:transparent;}
+  .btn-outline:hover{border-color:var(--paper);}
+  .btn-ghost{color:var(--muted);}
+  .hamburger{display:none; flex-direction:column; gap:4px; background:none; border:none;}
+  .hamburger span{width:22px; height:2px; background:var(--paper);}
+
+  /* HERO */
+  .hero{padding-top:72px; padding-bottom:40px; border-bottom:1px solid var(--line);}
+  .eyebrow{
+    font-family:var(--font-mono); font-size:0.78rem; color:var(--red);
+    text-transform:uppercase; letter-spacing:0.12em; margin-bottom:18px; display:block;
+  }
+  .hero h1{
+    font-family:var(--font-display); font-size:clamp(2.2rem, 5vw, 3.6rem);
+    font-weight:700; letter-spacing:-0.02em; line-height:1.05; max-width:820px;
+  }
+  .hero p.lead{margin-top:20px; font-size:1.08rem; color:var(--muted); max-width:560px;}
+  .hero-ctas{display:flex; gap:14px; margin-top:32px; flex-wrap:wrap;}
+
+  /* LIVE BOARD */
+  .board{
+    margin-top:56px; border:1px solid var(--line); border-radius:10px; overflow:hidden;
+    background:var(--ink-2);
+  }
+  .board-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; border-bottom:1px solid var(--line);
+    font-family:var(--font-mono); font-size:0.78rem; color:var(--muted);
+  }
+  .board-head .live{display:flex; align-items:center; gap:8px; color:var(--green);}
+  .live-dot{width:7px; height:7px; border-radius:50%; background:var(--green); animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.25;}}
+  .board-grid{
+    display:grid; grid-template-columns:repeat(4, 1fr);
+  }
+  .tile{
+    padding:20px; border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+    font-family:var(--font-mono);
+  }
+  .tile:nth-child(4n){border-right:none;}
+  .tile .group{font-size:1.7rem; font-weight:600;}
+  .tile .status{
+    display:inline-block; margin-top:10px; font-size:0.7rem; letter-spacing:0.08em;
+    text-transform:uppercase; padding:3px 8px; border-radius:4px;
+  }
+  .status.available{background:rgba(27,138,107,0.15); color:var(--green);}
+  .status.low{background:rgba(201,162,39,0.15); color:var(--amber);}
+  .status.critical{background:rgba(214,48,43,0.15); color:var(--red); animation:blink 1.4s infinite;}
+  @keyframes blink{0%,100%{opacity:1;} 50%{opacity:0.5;}}
+  .tile .count{margin-top:8px; font-size:0.78rem; color:var(--muted);}
+
+  /* STATS */
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); border-bottom:1px solid var(--line);}
+  .stat{padding:36px 24px; text-align:center; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat .num{font-family:var(--font-display); font-size:2.1rem; font-weight:700; color:var(--red);}
+  .stat .label{font-size:0.82rem; color:var(--muted); margin-top:6px;}
+
+  /* SECTION GENERIC */
+  .band{padding:88px 0; border-bottom:1px solid var(--line);}
+  .band.paper{background:var(--paper); color:var(--ink);}
+  .band.paper .muted{color:var(--muted-dark);}
+  .band-head{max-width:640px; margin-bottom:48px;}
+  .band-head .eyebrow{color:var(--red);}
+  .band-head h2{font-family:var(--font-display); font-size:clamp(1.8rem,3vw,2.6rem); font-weight:700; letter-spacing:-0.02em;}
+  .band-head p{margin-top:14px; color:var(--muted); font-size:1rem;}
+  .band.paper .band-head p{color:var(--muted-dark);}
+
+  .cards-2{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  .card{
+    border:1px solid var(--line-dark); border-radius:10px; padding:32px; background:#fff; color:var(--ink);
+  }
+  .card .tag{
+    font-family:var(--font-mono); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em;
+    padding:4px 10px; border-radius:4px; display:inline-block; margin-bottom:16px;
+  }
+  .tag.rep{background:rgba(27,138,107,0.12); color:var(--green);}
+  .tag.direct{background:rgba(214,48,43,0.12); color:var(--red);}
+  .card h3{font-family:var(--font-display); font-size:1.3rem; margin-bottom:10px; color:var(--ink);}
+  .card h3.h-rep{color:var(--green);}
+  .card h3.h-direct{color:var(--red);}
+  .card p{color:var(--muted-dark); font-size:0.95rem;}
+  .card ul{margin-top:14px;}
+  .card ul li{font-size:0.9rem; color:var(--muted-dark); padding:5px 0; padding-left:18px; position:relative;}
+  .card ul li::before{content:"•"; position:absolute; left:0; color:var(--red);}
+
+  .cards-3{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .feature{border:1px solid var(--line); border-radius:10px; padding:28px;}
+  .feature .num{font-family:var(--font-mono); color:var(--red); font-size:0.8rem;}
+  .feature h4{font-family:var(--font-display); margin:12px 0 8px; font-size:1.15rem;}
+  .feature p{color:var(--muted); font-size:0.92rem;}
+
+  /* ABOUT */
+  .about-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:56px; align-items:start;}
+  .about-grid h2{font-family:var(--font-display); font-size:clamp(1.8rem,3vw,2.4rem); margin-bottom:18px;}
+  .about-grid p{color:var(--muted); margin-bottom:16px; font-size:1rem;}
+  .side-card{background:var(--ink-2); border:1px solid var(--line); border-radius:10px; padding:26px;}
+  .side-card h4{font-family:var(--font-mono); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--red); margin-bottom:14px;}
+  .side-card .row{display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line); font-size:0.9rem;}
+  .side-card .row:last-child{border-bottom:none;}
+  .side-card .row span:last-child{font-family:var(--font-mono); color:var(--paper);}
+
+  /* FORMS */
+  .form-wrap{max-width:640px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block; font-size:0.85rem; margin-bottom:7px; color:var(--muted); font-weight:500;}
+  .band.paper .field label{color:var(--muted-dark);}
+  .field input, .field select, .field textarea{
+    width:100%; padding:12px 14px; border-radius:6px; border:1px solid var(--line);
+    background:var(--ink-2); color:var(--paper); font-size:0.95rem;
+  }
+  .band.paper .field input, .band.paper .field select, .band.paper .field textarea{
+    background:#fff; border-color:var(--line-dark); color:var(--ink);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{outline:2px solid var(--red); outline-offset:1px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .radio-group{display:flex; gap:12px; flex-wrap:wrap;}
+  .radio-card{
+    flex:1; min-width:220px; border:1px solid var(--line-dark); border-radius:8px; padding:16px;
+    cursor:pointer; transition:border-color .2s, background .2s;
+  }
+  .band.paper .radio-card{background:#fff;}
+  .radio-card.selected{border-color:var(--red); background:rgba(214,48,43,0.06);}
+  .radio-card strong{display:block; font-size:0.92rem; margin-bottom:4px;}
+  .radio-card span{font-size:0.82rem; color:var(--muted-dark);}
+  .radio-card input{display:none;}
+
+  /* RESULTS / TRACKING */
+  .results{margin-top:40px; display:none;}
+  .results.show{display:block; animation:fadeIn .4s ease;}
+  .track-widget{
+    border:1px solid var(--line-dark); border-radius:10px; padding:22px; margin-bottom:24px; background:#fff;
+  }
+  .track-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;}
+  .track-top .eta{font-family:var(--font-mono); font-size:1.4rem; color:var(--red); font-weight:600;}
+  .track-path{position:relative; height:6px; background:var(--line-dark); border-radius:3px; margin:24px 0;}
+  .track-path .fill{position:absolute; left:0; top:0; height:100%; background:var(--green); border-radius:3px; width:8%; transition:width 1.2s linear;}
+  .track-path .marker{
+    position:absolute; top:50%; transform:translate(-50%,-50%); width:14px; height:14px;
+    border-radius:50%; background:var(--red); box-shadow:0 0 0 4px rgba(214,48,43,0.15); left:8%;
+    transition:left 1.2s linear;
+  }
+  .track-labels{display:flex; justify-content:space-between; font-size:0.78rem; color:var(--muted-dark); font-family:var(--font-mono);}
+
+  .donor-card{
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    border:1px solid var(--line-dark); border-radius:8px; padding:18px; margin-bottom:12px; background:#fff;
+  }
+  .donor-left{display:flex; align-items:center; gap:14px;}
+  .avatar{
+    width:44px; height:44px; border-radius:50%; background:var(--ink); color:var(--paper);
+    display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:600;
+  }
+  .donor-meta strong{display:block; font-size:0.95rem;}
+  .donor-meta span{font-size:0.82rem; color:var(--muted-dark); font-family:var(--font-mono);}
+  .donor-actions{display:flex; gap:8px;}
+  .donor-actions .btn{padding:8px 14px; font-size:0.8rem;}
+
+  .confirm-box{
+    border:1px solid var(--green); background:rgba(27,138,107,0.08); border-radius:10px;
+    padding:22px; margin-top:24px; display:none;
+  }
+  .confirm-box.show{display:block; animation:fadeIn .4s ease;}
+  .confirm-box .id{font-family:var(--font-mono); color:var(--green); font-weight:600;}
+
+  /* CONTACT */
+  .contact-grid{display:grid; grid-template-columns:0.9fr 1.1fr; gap:56px;}
+  .contact-item{display:flex; gap:14px; align-items:flex-start; margin-bottom:22px;}
+  .icon-box{
+    width:40px; height:40px; border-radius:8px; background:var(--ink-2); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .contact-item h5{font-size:0.95rem; margin-bottom:3px;}
+  .contact-item p, .contact-item a{color:var(--muted); font-size:0.9rem;}
+  .contact-item a:hover{color:var(--paper);}
+
+  footer{padding:48px 0 32px; background:var(--ink-2);}
+  .footer-grid{display:flex; justify-content:space-between; flex-wrap:wrap; gap:24px; margin-bottom:32px;}
+  .footer-col h5{font-family:var(--font-mono); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:14px;}
+  .footer-col a, .footer-col p{display:block; color:var(--muted); font-size:0.9rem; margin-bottom:9px;}
+  .footer-col a:hover{color:var(--paper);}
+  .footer-bottom{border-top:1px solid var(--line); padding-top:20px; display:flex; justify-content:space-between; font-size:0.8rem; color:var(--muted-dark); flex-wrap:wrap; gap:10px;}
+
+  @media (max-width:860px){
+    nav.links{display:none;}
+    .hamburger{display:flex;}
+    .cards-2, .cards-3{grid-template-columns:1fr;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .stat:nth-child(2){border-right:none;}
+    .board-grid{grid-template-columns:repeat(2,1fr);}
+    .tile:nth-child(2n){border-right:none;}
+    .about-grid, .contact-grid{grid-template-columns:1fr;}
+    .field-row{grid-template-columns:1fr;}
+  }
+
+
+  /* ===== Buttons on LIGHT surfaces =====
+     .btn-outline is styled for the dark page (cream text, faint cream border). On the
+     white/cream donor section that made "Refresh" and "Decline" invisible. */
+  .btn:disabled{opacity:.55; cursor:not-allowed; transform:none;}
+  .band.paper .btn-outline, .on-light .btn-outline{
+    color:var(--ink); background:#fff; border-color:rgba(20,24,28,0.4);
+  }
+  .band.paper .btn-outline:hover:not(:disabled), .on-light .btn-outline:hover:not(:disabled){
+    border-color:var(--ink); background:rgba(20,24,28,0.06);
+  }
+  #arActions .btn-outline{border-color:rgba(241,237,230,0.45);}
+  .btn-green{background:var(--green); color:#fff;}
+  .btn-green:hover:not(:disabled){background:#17795e;}
+
+  /* ===== Live board ===== */
+  .tile.flash{animation:tileFlash 1.6s ease;}
+  @keyframes tileFlash{0%{background:rgba(27,138,107,0.4);} 100%{background:transparent;}}
+  .board-head .live.offline{color:var(--amber);}
+  .board-head .live.offline .live-dot{background:var(--amber);}
+
+  /* ===== Donor dashboard ===== */
+  .dash{background:#fff; border:1px solid var(--line-dark); border-radius:12px; padding:24px; margin-bottom:40px; color:var(--ink);}
+  .dash-head{display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:16px;}
+  .notif-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:0.85rem; color:var(--muted-dark);}
+  .warn-note{background:rgba(201,162,39,0.12); border:1px solid rgba(201,162,39,0.45); color:#6d5810; border-radius:8px; padding:10px 14px; font-size:0.85rem; margin-bottom:16px;}
+  .warn-note.ok{background:rgba(27,138,107,0.1); border-color:rgba(27,138,107,0.4); color:#12654d;}
+  .active-donation{border:1px solid var(--green); background:rgba(27,138,107,0.05); border-radius:12px; padding:20px; margin-bottom:22px;}
+  .active-head{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
+  .active-head h3{font-family:var(--font-display); font-size:1.15rem;}
+  .chip{font-family:var(--font-mono); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; padding:4px 10px; border-radius:4px; background:rgba(27,138,107,0.15); color:var(--green);}
+  .active-grid{display:grid; grid-template-columns:1fr 1.15fr; gap:22px;}
+  .kv{display:flex; justify-content:space-between; gap:14px; padding:8px 0; border-bottom:1px solid var(--line-dark); font-size:0.88rem;}
+  .kv > span:first-child{color:var(--muted-dark); flex-shrink:0;}
+  .kv > :last-child{text-align:right; word-break:break-word;}
+  .contact-actions{display:flex; gap:8px; margin-top:8px; justify-content:flex-end; flex-wrap:wrap;}
+  .contact-actions .btn{padding:7px 12px; font-size:0.78rem;}
+  /* isolation:isolate gives the map its own stacking context: Google Maps' internal layers use very
+     high z-index values, and without this they escaped the box and painted OVER the sticky header (z-index:100). */
+  #donationMap{position:relative; z-index:0; isolation:isolate; overflow:hidden; height:340px; border-radius:8px; border:1px solid var(--line-dark); background:#e8e2d6;}
+  #routeSummary{margin-top:10px; font-size:0.88rem; color:var(--muted-dark);}
+  #routeSummary strong{color:var(--ink);}
+  .share-line{font-size:0.82rem; color:var(--muted-dark); margin-top:12px;}
+  .share-line .live-dot{display:inline-block; margin-right:6px;}
+  .donation-actions{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;}
+
+  /* ===== Toasts ===== */
+  #toasts{position:fixed; bottom:18px; right:18px; z-index:10001; display:flex; flex-direction:column; gap:8px; max-width:calc(100vw - 36px);}
+  .toast{background:var(--ink-2); color:var(--paper); border:1px solid var(--line); border-left:4px solid var(--green); padding:11px 15px; border-radius:8px; font-size:0.88rem; max-width:360px; box-shadow:0 6px 22px rgba(0,0,0,0.45); animation:fadeIn .25s ease;}
+  .toast.err{border-left-color:var(--red);}
+
+  @media (max-width:860px){ .active-grid{grid-template-columns:1fr;} }
+
+
+  /* =====================================================================
+     UI ENHANCEMENT LAYER
+     ===================================================================== */
+  :focus-visible{outline:3px solid rgba(255,116,104,0.7); outline-offset:2px; border-radius:4px;}
+  .skip{position:absolute; left:-999px; top:8px; background:#fff; color:#14181c; padding:10px 16px; border-radius:8px; font-weight:600; z-index:10003;}
+  .skip:focus{left:12px;}
+  header{background:rgba(20,24,28,0.82); backdrop-filter:blur(14px) saturate(140%); box-shadow:0 1px 0 rgba(255,255,255,0.04), 0 10px 30px rgba(0,0,0,0.25);}
+  .logo-mark{animation:markBeat 1.8s ease-in-out infinite; transform-origin:50% 68%;}
+  @keyframes markBeat{0%,100%{transform:scale(1);} 14%{transform:scale(1.1);} 28%{transform:scale(1);}}
+  nav.links a{border-bottom-width:0; position:relative;}
+  nav.links a::after{content:""; position:absolute; left:0; right:0; bottom:-2px; height:2px; background:var(--red); transform:scaleX(0); transform-origin:left; transition:transform .25s ease;}
+  nav.links a:hover::after, nav.links a.active::after{transform:scaleX(1);}
+  .btn{transition:transform .15s ease, box-shadow .2s, background .2s, border-color .2s;}
+  .btn:hover{transform:translateY(-1px);}
+  .btn-red{background-color:#d6302b; background-image:linear-gradient(180deg,#e2423c,#c92a25); box-shadow:0 8px 22px rgba(214,48,43,0.28);}
+  .btn-red:hover{background-color:#d6302b; background-image:linear-gradient(180deg,#e84b45,#cf2c27); box-shadow:0 10px 26px rgba(214,48,43,0.4);}
+  .btn-lg{padding:14px 26px; font-size:0.95rem; border-radius:10px;}
+  .btn-sm{padding:7px 13px; font-size:0.78rem;}
+  .btn-light{background:#fff; color:#14181c;}
+  .btn-light:hover{background:#f1ede6;}
+  .muted{color:var(--muted);}
+  .small{font-size:0.8rem;}
+  .eyebrow.small{margin-bottom:4px; font-size:0.7rem;}
+
+  /* hero */
+  .hero{position:relative; overflow:hidden; padding-top:64px; padding-bottom:48px; background:radial-gradient(900px 460px at 88% -8%, rgba(214,48,43,0.2), transparent 62%), radial-gradient(600px 300px at 0% 100%, rgba(27,138,107,0.08), transparent 60%);}
+  .hero-grid{display:grid; grid-template-columns:1.05fr 0.95fr; gap:28px; align-items:center;}
+  .hero h1 .grad{background:linear-gradient(90deg,#ff8a7e,#d6302b 55%,#ff9a62); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .hero-art img{width:100%; height:auto; display:block; filter:drop-shadow(0 28px 56px rgba(214,48,43,0.28));}
+  .trust-row{display:flex; gap:10px 22px; flex-wrap:wrap; margin-top:30px; color:var(--muted); font-size:0.86rem;}
+  .trust-row li::before{content:""; display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--green); margin-right:9px; box-shadow:0 0 0 3px rgba(27,138,107,0.2);}
+
+  /* live board gauges */
+  .board{box-shadow:0 24px 60px rgba(0,0,0,0.35); border-radius:16px;}
+  .tile{position:relative; transition:background .2s;}
+  .tile:hover{background:rgba(241,237,230,0.035);}
+  .tile .gauge{height:5px; border-radius:3px; background:rgba(241,237,230,0.08); margin-top:12px; overflow:hidden;}
+  .tile .gauge i{display:block; height:100%; border-radius:3px; background:var(--green); transition:width .9s ease;}
+  .tile .gauge.low i{background:var(--amber);}
+  .tile .gauge.critical i{background:var(--red);}
+  .stat .num{font-size:2.5rem; background:linear-gradient(180deg,#ff8a7e,#d6302b); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .stat{transition:background .25s;} .stat:hover{background:rgba(241,237,230,0.03);}
+
+  /* motion */
+  .reveal{opacity:0; transform:translateY(20px); transition:opacity .7s ease var(--d,0s), transform .7s ease var(--d,0s);}
+  .reveal.in{opacity:1; transform:none;}
+  .card.reveal.in{transition:opacity .7s ease var(--d,0s), transform .25s ease, box-shadow .25s ease;}
+  .card:hover{transform:translateY(-4px); box-shadow:0 18px 40px rgba(0,0,0,0.18);}
+  img.illus, .step-img{border-radius:12px;}
+  @media (prefers-reduced-motion:reduce){ .reveal{opacity:1; transform:none; transition:none;} .logo-mark{animation:none;} }
+
+  /* features + CTA */
+  .feat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:8px;}
+  .feat{background:var(--ink-2); border:1px solid var(--line); border-radius:16px; padding:28px; transition:transform .25s, border-color .25s, box-shadow .25s;}
+  .feat:hover{transform:translateY(-4px); border-color:rgba(214,48,43,0.5); box-shadow:0 18px 40px rgba(0,0,0,0.3);}
+  .feat .ico{width:48px; height:48px; border-radius:13px; background:rgba(214,48,43,0.14); display:grid; place-items:center; margin-bottom:16px;}
+  .feat .ico svg{width:24px; height:24px; stroke:#ff7468; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+  .feat h3{font-family:var(--font-display); font-size:1.12rem; margin-bottom:8px;}
+  .feat p{color:var(--muted); font-size:0.92rem;}
+  .feat a.more{display:inline-block; margin-top:14px; color:#ff7468; font-weight:600; font-size:0.88rem;}
+  .feat a.more::after{content:" \2192"; transition:margin .2s;} .feat a.more:hover::after{margin-left:4px;}
+  .cta-wrap{padding-bottom:72px;}
+  .cta-banner{display:flex; align-items:center; justify-content:space-between; gap:28px; flex-wrap:wrap; padding:44px; border-radius:22px; background:radial-gradient(500px 220px at 100% 0%, rgba(255,255,255,0.18), transparent 60%), linear-gradient(120deg,#d6302b,#8a2622); box-shadow:0 30px 70px rgba(214,48,43,0.25);}
+  .cta-banner h2{font-family:var(--font-display); font-size:clamp(1.5rem,3vw,2.1rem);}
+  .cta-banner p{margin-top:8px; color:rgba(255,255,255,0.85);}
+  .cta-actions{display:flex; gap:12px; flex-wrap:wrap;}
+  .cta-banner .btn-outline{border-color:rgba(255,255,255,0.55);} .cta-banner .btn-outline:hover{background:rgba(255,255,255,0.12); border-color:#fff;}
+
+  /* guide tools */
+  .tool-card{background:var(--ink-2); border:1px solid var(--line); border-radius:20px; padding:32px; box-shadow:0 24px 60px rgba(0,0,0,0.25);}
+  .tool-top{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .tool-top h3{font-family:var(--font-display); font-size:1.3rem;}
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:999px; padding:4px; background:rgba(0,0,0,0.22);}
+  .seg button{border:none; background:transparent; color:var(--muted); padding:9px 18px; border-radius:999px; font-weight:600; font-size:0.85rem; transition:background .2s, color .2s;}
+  .seg button.on{background:var(--red); color:#fff;}
+  .compat-label{margin:22px 0 10px; color:var(--muted); font-size:0.88rem;}
+  .compat-groups{display:flex; gap:10px; flex-wrap:wrap;}
+  .chip-btn{min-width:68px; padding:13px 16px; border-radius:13px; border:1px solid var(--line); background:transparent; color:var(--paper); font:600 1.05rem var(--font-mono); transition:all .2s;}
+  .chip-btn:hover{border-color:var(--paper);}
+  .chip-btn.on{border-color:var(--red); background:rgba(214,48,43,0.18); box-shadow:0 0 0 3px rgba(214,48,43,0.16);}
+  .compat-result{display:grid; grid-template-columns:repeat(8,1fr); gap:10px; margin:6px 0 16px;}
+  .compat-chip{aspect-ratio:1; display:grid; place-items:center; border-radius:14px; border:1px dashed var(--line); color:var(--muted); font:600 1rem var(--font-mono); opacity:0.4; transition:all .3s;}
+  .compat-chip.yes{opacity:1; color:#fff; background:linear-gradient(160deg,#25b38c,#14705a); border:1px solid transparent; transform:translateY(-4px); box-shadow:0 12px 24px rgba(27,138,107,0.32);}
+  .compat-note{color:var(--paper); font-size:0.95rem; padding:14px 16px; border-left:3px solid var(--red); background:rgba(214,48,43,0.08); border-radius:0 10px 10px 0;}
+  .elig-grid{display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start;}
+  .elig-card{background:#fff; border:1px solid var(--line-dark); border-radius:20px; padding:30px; color:var(--ink); box-shadow:0 18px 44px rgba(20,24,28,0.08);}
+  .elig-card label{display:block; font-size:0.84rem; color:var(--muted-dark); margin:14px 0 6px; font-weight:600;}
+  .elig-card input[type=number], .elig-card input[type=date], .elig-card select{width:100%; padding:11px 12px; border-radius:9px; border:1px solid var(--line-dark); font-size:0.95rem; background:#fff; color:var(--ink);}
+  .elig-card fieldset{border:none; margin-top:12px;} .elig-card legend{font-size:0.84rem; font-weight:700; color:var(--ink); padding:0; margin-top:6px;}
+  .elig-card fieldset label{display:flex; gap:10px; align-items:flex-start; font-weight:500; margin:9px 0; color:var(--ink);} .elig-card fieldset input{margin-top:3px; accent-color:var(--red);}
+  .elig-result{display:none; margin-top:18px; padding:16px 18px; border-radius:12px; font-size:0.92rem;}
+  .elig-result ul{margin:8px 0 0 18px; list-style:disc;} .elig-result li{margin:4px 0;} .elig-result p{margin-top:8px;} .elig-result .muted{color:inherit; opacity:0.8;}
+  .elig-result.eligible{background:rgba(27,138,107,0.1); border:1px solid rgba(27,138,107,0.45); color:#0f5a45;}
+  .elig-result.wait{background:rgba(201,162,39,0.12); border:1px solid rgba(201,162,39,0.5); color:#6d5810;}
+  .elig-result.no{background:rgba(214,48,43,0.08); border:1px solid rgba(214,48,43,0.4); color:#8a2622;}
+  .facts h3{font-family:var(--font-display); font-size:1.3rem; margin-bottom:16px; color:var(--ink);}
+  details.fact{background:#fff; border:1px solid var(--line-dark); border-radius:14px; margin-bottom:10px; color:var(--ink); transition:box-shadow .2s;}
+  details.fact[open]{box-shadow:0 10px 26px rgba(20,24,28,0.08);}
+  details.fact summary{padding:16px 20px; cursor:pointer; font-weight:600; list-style:none; display:flex; justify-content:space-between; gap:12px;}
+  details.fact summary::-webkit-details-marker{display:none;} details.fact summary span{color:var(--red); font-size:1.3rem; line-height:1; transition:transform .2s;}
+  details.fact[open] summary span{transform:rotate(45deg);} details.fact p{padding:0 20px 18px; color:var(--muted-dark); font-size:0.92rem;}
+  .timeline{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; counter-reset:step;}
+  .tl{border:1px solid var(--line); border-radius:16px; background:var(--ink-2); padding:24px;}
+  .tl::before{counter-increment:step; content:counter(step); display:grid; place-items:center; width:36px; height:36px; border-radius:50%; background:var(--red); color:#fff; font-weight:700; margin-bottom:14px;}
+  .tl h4{font-family:var(--font-display); margin-bottom:6px;} .tl p{color:var(--muted); font-size:0.9rem;}
+  .guide-disclaimer{margin-top:26px; color:var(--muted); font-size:0.82rem; text-align:center;}
+
+  /* reach + share */
+  .reach-box{display:none; align-items:center; gap:12px; margin:18px 0 12px; padding:13px 16px; border-radius:12px; font-size:0.9rem; border:1px solid;}
+  .reach-box.good{background:rgba(27,138,107,0.09); border-color:rgba(27,138,107,0.45); color:#0f5a45;}
+  .reach-box.warn{background:rgba(201,162,39,0.12); border-color:rgba(201,162,39,0.5); color:#6d5810;}
+  .reach-ico{width:10px; height:10px; border-radius:50%; background:currentColor; box-shadow:0 0 0 4px rgba(27,138,107,0.2); flex:none;}
+  .share-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:18px; padding-top:16px; border-top:1px solid var(--line); font-size:0.85rem; color:var(--muted);}
+
+  /* donor panel */
+  .donor-panel{display:grid; grid-template-columns:1.5fr 0.8fr; gap:16px; margin-bottom:22px;}
+  .level-card{background:linear-gradient(135deg,#fff,#faf7f2); border:1px solid var(--line-dark); border-radius:16px; padding:20px;}
+  .level-line{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;} .level-line strong{font-family:var(--font-display); font-size:1.5rem; color:var(--ink);}
+  .level-bar{height:9px; background:var(--line-dark); border-radius:6px; overflow:hidden; margin:12px 0 8px;}
+  .level-bar i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--red),#ff7468); transition:width .9s ease;}
+  .dash .muted{color:var(--muted-dark);}
+  .lives-card{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:var(--ink); color:var(--paper); border-radius:16px; padding:18px;}
+  .lives-card strong{font:700 2.6rem var(--font-display); color:#ff7468; line-height:1;} .lives-card span{font-size:0.8rem; color:var(--muted); margin-top:6px;}
+  .panel-actions{grid-column:1/-1; display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .chip[data-state="inactive"]{background:rgba(201,162,39,0.2); color:#7a6210;}
+  .chip[data-state="cooldown"]{background:rgba(91,100,114,0.18); color:var(--muted-dark);}
+
+  /* footer */
+  footer{background:linear-gradient(180deg,var(--ink),#0f1215);}
+  .footer-col a{transition:color .2s, transform .2s; display:block;} .footer-col a:hover{color:var(--paper); transform:translateX(3px);}
+
+  @media (max-width:900px){
+    .hero-grid{grid-template-columns:1fr;} .hero-art{max-width:440px; margin:0 auto; order:-1;}
+    .feat-grid{grid-template-columns:1fr 1fr;} .timeline{grid-template-columns:1fr 1fr;}
+    .elig-grid{grid-template-columns:1fr;} .donor-panel{grid-template-columns:1fr;} .compat-result{grid-template-columns:repeat(4,1fr);}
+  }
+  @media (max-width:640px){
+    .feat-grid, .timeline{grid-template-columns:1fr;} .cta-banner{padding:30px 24px;} .tool-card, .elig-card{padding:22px;}
+    .stats{grid-template-columns:repeat(2,1fr);} .stat:nth-child(2){border-right:none;} .stat{border-bottom:1px solid var(--line);}
+    .install-btn{display:none !important;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+<script src="bloodsync-config.js"></script>
+<script src="bloodsync-shared.js"></script>
+<script src="bloodsync-extras.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header>
+  <div class="navbar wrap">
+    <div class="logo"><svg class="logo-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2C12 2.2 5 10 5 15a7 7 0 0014 0c0-5-7-12.8-7-12.8z" fill="#e23a33"/><path d="M8.5 15.5h2l1.2-2.4 1.6 4 1.2-1.6h1.5" fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>BloodSync</div>
+    <nav class="links" id="navLinks">
+      <a href="#" data-route="home" class="active">Home</a>
+      <a href="#" data-route="about">About Us</a>
+      <a href="#" data-route="guide">Blood Guide</a>
+      <a href="#" data-route="contact">Contact Us</a>
+    </nav>
+    <div class="nav-actions">
+      <button type="button" class="btn btn-outline install-btn" data-install style="display:none;">Install app</button>
+      <a class="btn btn-red" href="#" data-route="urgent">Need blood now</a>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <nav class="links" id="mobileLinks" style="display:none; flex-direction:column; padding:0 24px 18px; gap:14px;">
+    <a href="#" data-route="home">Home</a>
+    <a href="#" data-route="about">About Us</a>
+    <a href="#" data-route="guide">Blood Guide</a>
+    <a href="#" data-route="contact">Contact Us</a>
+  </nav>
+</header>
+
+<main id="main">
+
+  <!-- ================= HOME ================= -->
+  <section class="section active" id="home">
+    <div class="hero wrap">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Karachi → Khyber · One network, one call</span>
+          <h1>Find blood in one click, <span class="grad">anywhere in Pakistan.</span></h1>
+          <p class="lead">Donors are matched by proximity and blood group. Whether it is a routine replacement or a rare-group emergency, BloodSync finds someone who can help fast, then lets you watch them arrive.</p>
+          <div class="hero-ctas">
+            <a class="btn btn-red btn-lg" href="#" data-route="urgent">I need blood urgently</a>
+            <a class="btn btn-outline btn-lg" href="#" data-route="donate">Become a donor</a>
+          </div>
+          <ul class="trust-row">
+            <li>Live donor tracking</li>
+            <li>Free for everyone</li>
+            <li>Works on any phone</li>
+          </ul>
+        </div>
+        <div class="hero-art">
+          <img src="img/hero.svg" width="560" height="520" alt="A glowing blood drop with a heartbeat line, a live request alert and a donor on the way" fetchpriority="high">
+        </div>
+      </div>
+
+      <div class="board">
+        <div class="board-head">
+          <span>LIVE BLOOD AVAILABILITY BOARD</span>
+          <span class="live" id="liveLabel"><span class="live-dot"></span><span id="liveText">LIVE</span></span>
+        </div>
+        <div class="board-grid" id="boardGrid"></div>
+      </div>
+    </div>
+
+    <div class="stats wrap" style="max-width:1180px; margin:0 auto;">
+      <div class="stat"><div class="num" data-stat="activeDonors">0</div><div class="label">Active donors ready to help</div></div>
+      <div class="stat"><div class="num" data-stat="cities">0</div><div class="label">Cities covered</div></div>
+      <div class="stat"><div class="num" data-stat="fulfilled">0</div><div class="label">Donations completed</div></div>
+      <div class="stat"><div class="num" data-stat="avgMatchMinutes">Fast</div><div class="label">Average time to a match</div></div>
+    </div>
+
+    <div class="band">
+      <div class="wrap">
+        <div class="band-head">
+          <span class="eyebrow">Two ways to find blood</span>
+          <h2>Not every request is the same, so we don't treat them the same.</h2>
+          <p>Pakistan's blood supply runs mostly on the replacement system. BloodSync is built around that reality, plus a separate path for when the group is rare or the bank is simply empty.</p>
+        </div>
+        <div class="cards-2">
+          <div class="card reveal">
+            <span class="tag rep">Replacement match</span>
+            <h3 class="h-rep">For planned, routine needs</h3>
+            <p>Hospitals ask a patient's family to arrange a replacement donor before releasing a unit. Any healthy donor of a compatible group usually qualifies. BloodSync finds the nearest willing donor immediately, no group rarity involved.</p>
+            <ul>
+              <li>Matched purely by distance and availability</li>
+              <li>Typical use: surgeries, planned transfusions, thalassemia support</li>
+              <li>Fastest path, often resolved in minutes</li>
+            </ul>
+          </div>
+          <div class="card reveal">
+            <span class="tag direct">Direct-need match</span>
+            <h3 class="h-direct">For rare groups or empty stock</h3>
+            <p>Sometimes the exact group isn't sitting on a shelf anywhere nearby: an AB-negative unit, or a bank that's simply run dry. BloodSync widens the search across its full donor network to find someone with that specific group, wherever they are.</p>
+            <ul>
+              <li>Matched strictly by blood group compatibility</li>
+              <li>Typical use: rare groups (AB-, O-, B-), depleted bank stock</li>
+              <li>Searches beyond your immediate city if needed</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="band paper">
+      <div class="wrap">
+        <div class="band-head">
+          <span class="eyebrow">How BloodSync works</span>
+          <h2>From request to a donor at your door.</h2>
+        </div>
+        <div class="cards-3">
+          <div class="feature" style="padding:0; overflow:hidden;">
+            <img src="img/step-match.svg" alt="A requester pin on a map with the nearest matching donors around it" loading="lazy" decoding="async" style="width:100%; height:150px; object-fit:cover; display:block;">
+            <div style="padding:24px;">
+              <span class="num">Nearest match</span>
+              <h4>Nearest active donor, automatically</h4>
+              <p>Enter your city and blood group, and BloodSync scans active donors nearby, ranking them by distance and last donation date, so the healthiest, closest match comes first.</p>
+            </div>
+          </div>
+          <div class="feature" style="padding:0; overflow:hidden;">
+            <img src="img/step-track.svg" alt="A donor moving along a route toward the hospital with a live arrival time" loading="lazy" decoding="async" style="width:100%; height:150px; object-fit:cover; display:block;">
+            <div style="padding:24px;">
+              <span class="num">Live tracking</span>
+              <h4>Know exactly when help arrives</h4>
+              <p>Once a donor confirms, track their movement toward the hospital in real time, with a live ETA, the same certainty you'd expect from a ride-hailing app, built for something that actually saves a life.</p>
+            </div>
+          </div>
+          <div class="feature" style="padding:0; overflow:hidden;">
+            <img src="img/step-trust.svg" alt="A verified network of donors around a shield with a check mark" loading="lazy" decoding="async" style="width:100%; height:150px; object-fit:cover; display:block;">
+            <div style="padding:24px;">
+              <span class="num">Verified pool</span>
+              <h4>A donor network you can trust</h4>
+              <p>Every donor registers with their blood group, city, and contact details, so requesters aren't chasing WhatsApp forwards and outdated Facebook posts during an emergency.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="wrap">
+        <div class="band-head">
+          <span class="eyebrow">More than a list of donors</span>
+          <h2>Everything an emergency needs, in your pocket.</h2>
+          <p>Small details that save minutes when minutes matter, and make donating something people want to keep doing.</p>
+        </div>
+        <div class="feat-grid">
+          <div class="feat reveal"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a3 3 0 1 0-2.8-4M6 15a3 3 0 1 0 2.8 4M18 16a3 3 0 1 1 0 .01M8.6 17.3l6.8-3.6M15.4 6.3L8.6 9.7"/></svg></span><h3>Share in one tap</h3><p>Send the request to family and community groups on WhatsApp with a ready-made message. It never includes the patient's name.</p><a class="more" href="#" data-route="urgent">Make a request</a></div>
+          <div class="feat reveal" style="--d:.07s"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><h3>Know before you send it</h3><p>As you fill in the form, see roughly how many donors are within 5 km and 15 km, so you know your request will be heard.</p><a class="more" href="#" data-route="urgent">Try it</a></div>
+          <div class="feat reveal" style="--d:.14s"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><h3>Pause when you need rest</h3><p>Donors are in control. Pause alerts while you travel or sleep, and resume with one tap. Your 3-month rest period is handled for you.</p><a class="more" href="#" data-route="donate">Become a donor</a></div>
+          <div class="feat reveal"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.3 6.8 19.1l1-5.8L3.5 9.2l5.9-.9Z"/></svg></span><h3>Levels and a donor card</h3><p>Earn levels from First Drop to Guardian, see the lives you may have helped, and download a shareable donor card.</p><a class="more" href="#" data-route="donate">See your level</a></div>
+          <div class="feat reveal" style="--d:.07s"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3 5-6"/><rect x="4" y="3" width="16" height="18" rx="3"/></svg></span><h3>Am I eligible?</h3><p>A two-minute check covers age, weight, the 3-month gap and common reasons to wait, with the exact date you can donate again.</p><a class="more" href="#" data-route="guide">Check now</a></div>
+          <div class="feat reveal" style="--d:.14s"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg></span><h3>Install it like an app</h3><p>Add BloodSync to your home screen for one-tap access and alerts that arrive even when the website is closed.</p><a class="more" href="#" data-route="contact">Need help installing?</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap cta-wrap">
+      <div class="cta-banner reveal">
+        <div><h2>Ready to be someone's hero?</h2><p>It takes two minutes to register. One donation can help up to three people.</p></div>
+        <div class="cta-actions"><a class="btn btn-light btn-lg" href="#" data-route="donate">Register as a donor</a><a class="btn btn-outline btn-lg" href="#" data-route="guide">Learn the basics</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ABOUT ================= -->
+  <section class="section" id="about">
+    <div class="band" style="padding-top:64px;">
+      <div class="wrap">
+        <div class="about-grid">
+          <div>
+            <span class="eyebrow">About BloodSync</span>
+            <h2>Blood shouldn't depend on who you happen to know.</h2>
+            <p>In Pakistan, finding blood in an emergency usually means the same scramble: a WhatsApp message forwarded to forty groups, a Facebook post asking strangers to share, a family member calling every contact they have who might be A-negative. It works, eventually, but "eventually" is a dangerous word when someone is on a hospital bed.</p>
+            <p>BloodSync exists to close that gap. It's a single, always-on network of registered donors across Pakistan, matched to requests instantly by location and blood group, built around how blood donation actually works here, not an imported model that assumes a system we don't have.</p>
+            <p>That means respecting the replacement donor culture most hospitals rely on, while still giving rare-group and empty-stock cases a dedicated, wider search, because a routine request and a genuine emergency don't deserve the same treatment.</p>
+          </div>
+          <figure style="margin:0; border-radius:10px; overflow:hidden; border:1px solid var(--line);">
+            <img src="img/about-network.svg" alt="All eight blood groups connected into one network" loading="lazy" decoding="async" style="width:100%; height:100%; object-fit:cover; display:block; filter:grayscale(15%);">
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <div class="band paper">
+      <div class="wrap">
+        <div class="band-head">
+          <span class="eyebrow">What's next</span>
+          <h2>A donor gets more than a thank-you.</h2>
+          <p>Giving blood costs a donor real time and a bit of their day. BloodSync's roadmap is about paying that back, and making the system around donation stronger, not just the matching inside it.</p>
+        </div>
+        <div class="cards-3">
+          <div class="feature" style="border-color:var(--line-dark); padding:0; overflow:hidden;">
+            <img src="img/partner-dashboard.svg" alt="A hospital dashboard showing blood stock bars and a request list" loading="lazy" decoding="async" style="width:100%; height:160px; object-fit:cover; display:block;">
+            <div style="padding:24px;">
+              <span class="num">Bank &amp; hospital partnerships</span>
+              <h4>A dashboard for every partner</h4>
+              <p>Blood banks and hospitals we partner with get their own dashboard to manage requests, donor call-outs, and stock, directly from BloodSync, instead of running it over phone calls and registers.</p>
+            </div>
+          </div>
+          <div class="feature" style="border-color:var(--line-dark); padding:0; overflow:hidden;">
+            <img src="img/partner-lab.svg" alt="Laboratory test tubes with a health check mark" loading="lazy" decoding="async" style="width:100%; height:160px; object-fit:cover; display:block;">
+            <div style="padding:24px;">
+              <span class="num">Partner labs</span>
+              <h4>A free basic health checkup</h4>
+              <p>Every donor is offered a free basic health checkup from a partner lab after donating, a way of looking after the people who look after everyone else.</p>
+            </div>
+          </div>
+          <div class="feature" style="border-color:var(--line-dark); padding:0; overflow:hidden;">
+            <img src="img/partner-pharmacy.svg" alt="Medicine capsules and a thank-you discount tag" loading="lazy" decoding="async" style="width:100%; height:160px; object-fit:cover; display:block;">
+            <div style="padding:24px;">
+              <span class="num">Partner pharmacies</span>
+              <h4>Discounts that say thank you</h4>
+              <p>Donors get discount coupons at partner pharmacies after every donation, a small, practical way to appreciate the people keeping the network alive.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================= BLOOD GUIDE ================= -->
+  <section class="section" id="guide">
+    <div class="band" style="padding-top:64px;">
+      <div class="wrap">
+        <div class="band-head">
+          <span class="eyebrow">Blood guide</span>
+          <h2>Know your blood. Know who you can help.</h2>
+          <p>Two quick tools and the answers to the questions people ask most before they donate.</p>
+        </div>
+        <div class="tool-card reveal" id="compat">
+          <div class="tool-top">
+            <h3>Blood compatibility explorer</h3>
+            <div class="seg" role="group" aria-label="Choose a view">
+              <button type="button" class="on" data-mode="give" aria-pressed="true">I want to donate</button>
+              <button type="button" data-mode="get" aria-pressed="false">I need blood</button>
+            </div>
+          </div>
+          <p class="compat-label">Pick your blood group</p>
+          <div class="compat-groups" id="compatGroups"></div>
+          <p class="compat-label" id="compatLabel"></p>
+          <div class="compat-result" id="compatResult"></div>
+          <p class="compat-note" id="compatNote"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="band paper" style="padding-top:64px;">
+      <div class="wrap">
+        <div class="band-head">
+          <span class="eyebrow">Before you donate</span>
+          <h2>Am I eligible?</h2>
+          <p>Answer a few quick questions. Nothing is saved or sent anywhere.</p>
+        </div>
+        <div class="elig-grid">
+          <form class="elig-card reveal" id="eligForm" novalidate>
+            <label for="eligAge">Your age</label><input type="number" id="eligAge" min="1" max="120" placeholder="e.g. 28" required>
+            <label for="eligWeight">Your weight (kg)</label><input type="number" id="eligWeight" min="20" max="250" placeholder="e.g. 68" required>
+            <label for="eligGender">Gender</label>
+            <select id="eligGender"><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Prefer not to say</option></select>
+            <label for="eligLast">Date of your last blood donation (leave empty if never)</label><input type="date" id="eligLast">
+            <fieldset class="flags"><legend>Does any of this apply to you right now?</legend>
+              <label><input type="checkbox" name="flag" value="ill"> Fever, cold, flu or feeling unwell</label>
+              <label><input type="checkbox" name="flag" value="tattoo"> Tattoo, piercing or surgery in the last 6 months</label>
+              <label><input type="checkbox" name="flag" value="antibiotics"> Taking antibiotics</label>
+              <label><input type="checkbox" name="flag" value="alcohol"> Drank alcohol in the last 48 hours</label>
+              <label><input type="checkbox" name="flag" value="vaccine"> Vaccinated in the last 2 weeks</label>
+              <label id="eligPregRow" style="display:none;"><input type="checkbox" name="flag" value="pregnant"> Pregnant or breastfeeding</label>
+            </fieldset>
+            <button type="submit" class="btn btn-red" style="margin-top:6px;">Check my eligibility</button>
+            <div class="elig-result" id="eligResult" role="status" aria-live="polite"></div>
+          </form>
+          <div class="facts reveal" style="--d:.08s">
+            <h3>Myths and facts</h3>
+            <details class="fact"><summary>Will donating make me weak?<span aria-hidden="true">+</span></summary><p>Most people feel fine. Your body replaces the fluid within a day and the red cells within a few weeks. Drink plenty of water, eat well, and skip heavy exercise for the rest of the day.</p></details>
+            <details class="fact"><summary>Does it hurt?<span aria-hidden="true">+</span></summary><p>You feel a quick pinch when the needle goes in. The donation itself, about ten minutes, is usually painless.</p></details>
+            <details class="fact"><summary>Can I donate if I am vegetarian?<span aria-hidden="true">+</span></summary><p>Yes. Staff check your haemoglobin before every donation. Iron-rich foods such as lentils, spinach and dates help you stay ready.</p></details>
+            <details class="fact"><summary>How long does stored blood last?<span aria-hidden="true">+</span></summary><p>Red cells can be stored for up to 42 days, but platelets only last about 5 to 7 days. That is why regular donors matter so much.</p></details>
+            <details class="fact"><summary>How many people can one donation help?<span aria-hidden="true">+</span></summary><p>A single donation can be separated into red cells, plasma and platelets, so it can help up to three patients.</p></details>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="band" style="padding-top:64px;">
+      <div class="wrap">
+        <div class="band-head">
+          <span class="eyebrow">What to expect</span>
+          <h2>Your donation, step by step.</h2>
+        </div>
+        <div class="timeline">
+          <div class="tl reveal"><h4>Quick screening</h4><p>A short health questionnaire, plus a check of your pulse, blood pressure and haemoglobin. About 10 minutes.</p></div>
+          <div class="tl reveal" style="--d:.07s"><h4>The donation</h4><p>You sit back while about 450 ml of blood is collected. It takes around 10 minutes.</p></div>
+          <div class="tl reveal" style="--d:.14s"><h4>Rest and refresh</h4><p>Stay for 10 to 15 minutes with a drink and a snack before heading out.</p></div>
+          <div class="tl reveal" style="--d:.21s"><h4>It goes to work</h4><p>Your blood is tested, separated and sent to patients who need it. Your 3-month rest period starts.</p></div>
+        </div>
+        <p class="guide-disclaimer">This guide is general information, not medical advice. Medical staff always make the final decision on the day.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= URGENT NEED ================= -->
+  <section class="section" id="urgent">
+    <div class="band" style="padding-top:64px;">
+      <div class="wrap">
+        <div class="about-grid" style="margin-bottom:48px;">
+          <div>
+            <span class="eyebrow">Urgent need of blood</span>
+            <h2>Tell us what's needed. We'll find who's closest.</h2>
+            <p style="color:var(--muted); margin-top:14px;">Submit the request and the nearest matching donors are alerted instantly. Once one accepts, you'll see their details and live location on a tracking map, and you can cancel the request any time.</p>
+          </div>
+          <figure style="margin:0; border-radius:10px; overflow:hidden; border:1px solid var(--line);">
+            <img src="img/urgent-bag.svg" alt="A bag of O negative blood with a tube and a falling drop" loading="lazy" decoding="async" style="width:100%; height:100%; object-fit:cover; display:block;">
+          </figure>
+        </div>
+
+        <div class="form-wrap">
+          <form id="urgentForm">
+            <div class="field">
+              <label>Request type</label>
+              <div class="radio-group">
+                <label class="radio-card" id="repCard">
+                  <input type="radio" name="reqType" value="replacement" checked>
+                  <strong>Replacement match</strong>
+                  <span>Any compatible donor nearby, for routine or planned needs</span>
+                </label>
+                <label class="radio-card" id="directCard">
+                  <input type="radio" name="reqType" value="direct">
+                  <strong>Direct-need match</strong>
+                  <span>Rare group or hospital stock is empty</span>
+                </label>
+              </div>
+            </div>
+
+            <span class="eyebrow" style="display:block; margin:28px 0 14px;">Patient details</span>
+            <div class="field-row">
+              <div class="field">
+                <label>Patient's name</label>
+                <input type="text" id="patientNameInput" placeholder="Full name" required>
+              </div>
+              <div class="field">
+                <label>Patient's age</label>
+                <input type="number" min="0" id="patientAgeInput" placeholder="e.g. 34" required>
+              </div>
+            </div>
+            <div class="field">
+              <label>Patient's gender</label>
+              <select id="patientGenderSelect" required>
+                <option value="">Select</option>
+                <option>Male</option><option>Female</option><option>Prefer not to say</option>
+              </select>
+            </div>
+
+            <span class="eyebrow" style="display:block; margin:28px 0 14px;">Request details</span>
+            <div class="field-row">
+              <div class="field" id="bloodGroupField">
+                <label>Blood group needed</label>
+                <select id="bloodGroupSelect" required>
+                  <option value="">Select group</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Units required</label>
+                <input type="number" min="1" id="unitsInput" placeholder="e.g. 2" required>
+              </div>
+            </div>
+            <div class="field">
+              <label>Reason / diagnosis</label>
+              <select id="reasonSelect" required>
+                <option value="">Select reason</option>
+                <option>Surgery</option>
+                <option>Accident / trauma</option>
+                <option>Delivery / childbirth</option>
+                <option>Thalassemia</option>
+                <option>Dengue</option>
+                <option>Cancer treatment</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="field" id="reasonOtherField" style="display:none;">
+              <label>Please specify</label>
+              <input type="text" id="reasonOtherInput" placeholder="Describe the reason">
+            </div>
+
+            <span class="eyebrow" style="display:block; margin:28px 0 14px;">Hospital &amp; doctor</span>
+            <div class="field-row">
+              <div class="field">
+                <label>Hospital name</label>
+                <input type="text" id="hospitalNameInput" placeholder="e.g. Civil Hospital" required>
+              </div>
+              <div class="field">
+                <label>Hospital location / area</label>
+                <input type="text" id="hospitalAreaInput" placeholder="e.g. Saddar, Karachi" required>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Doctor's name</label>
+                <input type="text" id="doctorNameInput" placeholder="e.g. Dr. Ahmed Raza">
+              </div>
+              <div class="field">
+                <label>Doctor's contact number</label>
+                <input type="tel" id="doctorContactInput" placeholder="03XX XXXXXXX">
+              </div>
+            </div>
+
+            <span class="eyebrow" style="display:block; margin:28px 0 14px;">Your details</span>
+            <div class="field-row">
+              <div class="field">
+                <label>Your relationship to the patient</label>
+                <select id="relationshipSelect" required>
+                  <option value="">Select</option>
+                  <option>Self</option><option>Parent</option><option>Spouse</option>
+                  <option>Sibling</option><option>Child</option><option>Other relative</option>
+                  <option>Friend</option><option>Hospital staff</option><option>Other</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Your contact number</label>
+                <input type="tel" id="requesterContactInput" placeholder="03XX XXXXXXX" required>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Additional notes (optional)</label>
+              <textarea rows="3" id="notesInput" maxlength="500" placeholder="Anything a nearby donor should know"></textarea>
+            </div>
+
+            <div class="reach-box" id="reachBox" role="status" aria-live="polite"></div>
+            <button class="btn btn-red" type="submit" style="width:100%; padding:14px;">Search nearest donors</button>
+          </form>
+
+          <div class="results" id="urgentResults">
+            <div class="confirm-box show" id="activeRequestBox" style="border-color:var(--red); background:rgba(214,48,43,0.06); display:block;">
+              <p><strong id="arTitle">Request submitted.</strong> <span id="arText">Nearby donors are being alerted right now.</span></p>
+              <p id="arSub" style="margin-top:8px; color:var(--muted); font-size:0.88rem;">Your live tracking page opens in a new tab. Didn't see it? Your browser may have blocked the pop-up. <a href="#" id="reopenTrackingLink" style="color:var(--red); text-decoration:underline;">Click here to open it</a>.</p>
+              <div id="arActions" style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+                <a class="btn btn-red" id="openTrackingBtn" href="#" target="_blank" rel="noopener">Open live tracking</a>
+                <button type="button" class="btn btn-outline" id="cancelMyRequestBtn">Cancel My Request</button>
+              </div>
+              <div class="share-row" id="shareRow">
+                <span>Share this request:</span>
+                <button type="button" class="btn btn-outline btn-sm" data-share="whatsapp">WhatsApp</button>
+                <button type="button" class="btn btn-outline btn-sm" data-share="copy">Copy message</button>
+                <button type="button" class="btn btn-outline btn-sm" data-share="native">More options</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DONATE ================= -->
+  <section class="section" id="donate">
+    <div class="band paper" style="padding-top:64px;">
+      <div class="wrap">
+        <div class="band-head">
+          <span class="eyebrow">Donate my blood</span>
+          <h2>Register once. Get called when it matters.</h2>
+          <p>Takes under two minutes. You'll only be contacted when your blood group and location are a genuine match.</p>
+        </div>
+
+        <div class="dash" id="donorDashboard" style="display:none;">
+          <div class="dash-head">
+            <div>
+              <span class="eyebrow" style="margin-bottom:4px;">Your donor dashboard</span>
+              <strong id="dashDonorLabel" style="font-family:var(--font-mono);"></strong>
+            </div>
+            <div class="notif-row">
+              <span id="notifStatus">Checking notifications…</span>
+              <button type="button" class="btn btn-outline" id="enableNotifBtn" style="display:none; padding:7px 12px; font-size:0.78rem;">Turn on notifications</button>
+            </div>
+          </div>
+
+          <div class="donor-panel" id="donorPanel">
+            <div class="level-card">
+              <span class="eyebrow small">Your level</span>
+              <div class="level-line"><strong id="levelName">Ready Donor</strong><span class="muted" id="levelCount">0 donations</span></div>
+              <div class="level-bar" aria-hidden="true"><i id="levelBar"></i></div>
+              <small class="muted" id="levelNext"></small>
+            </div>
+            <div class="lives-card"><strong id="livesCount">0</strong><span>lives you may have helped</span></div>
+            <div class="panel-actions">
+              <span class="chip" id="donorStatusChip" data-state="active">Alerts on</span>
+              <button type="button" class="btn btn-outline btn-sm" id="pauseBtn">Pause alerts</button>
+              <button type="button" class="btn btn-outline btn-sm" id="cardBtn">Download donor card</button>
+            </div>
+            <p class="warn-note" id="cooldownNote" style="display:none; grid-column:1/-1; margin:0;"></p>
+          </div>
+
+          <div id="donationEndedNote" class="warn-note" style="display:none;" role="status"></div>
+
+          <div class="active-donation" id="activeDonation" style="display:none;">
+            <div class="active-head">
+              <h3>Your active donation <span id="adReqId" style="font-family:var(--font-mono); font-size:0.8rem; color:var(--muted-dark);"></span></h3>
+              <span class="chip" id="adStatus">Accepted</span>
+            </div>
+            <div class="active-grid">
+              <div id="donationDetails"></div>
+              <div>
+                <div id="donationMap"></div>
+                <div id="routeSummary">Finding the shortest route…</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="myRequestsPanel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <strong style="font-size:0.95rem;">Requests waiting on you</strong>
+              <button type="button" id="refreshRequestsBtn" class="btn btn-outline" style="padding:6px 12px; font-size:0.78rem;">Refresh</button>
+            </div>
+            <div id="myRequestsList" style="color:var(--muted-dark); font-size:0.88rem;">Checking…</div>
+          </div>
+        </div>
+
+        <div class="about-grid" style="align-items:flex-start;">
+          <figure style="margin:0; border-radius:10px; overflow:hidden; border:1px solid var(--line-dark); order:2;">
+            <img src="img/donate-heart.svg" alt="A heart holding a blood drop" loading="lazy" decoding="async" style="width:100%; height:100%; object-fit:cover; display:block;">
+          </figure>
+        <div class="form-wrap" style="order:1;">
+          <form id="donateForm">
+            <span class="eyebrow" style="display:block; margin-bottom:14px; color:var(--red);">Personal details</span>
+            <div class="field-row">
+              <div class="field">
+                <label>Full name</label>
+                <input type="text" id="donateNameInput" placeholder="Your name" required>
+              </div>
+              <div class="field">
+                <label>Age</label>
+                <input type="number" id="donateAgeInput" min="18" max="65" placeholder="18 to 65" required>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Gender</label>
+                <select id="donateGender" required>
+                  <option value="">Select</option>
+                  <option>Male</option><option>Female</option><option>Prefer not to say</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>CNIC / ID number</label>
+                <input type="text" id="donateCnicInput" placeholder="e.g. 42101-1234567-1" required>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Weight (kg)</label>
+                <input type="number" id="donateWeightInput" min="30" placeholder="Minimum 50 kg typically" required>
+              </div>
+              <div class="field">
+                <label>Blood group</label>
+                <select id="donateBloodGroupSelect" required>
+                  <option value="">Select group</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </div>
+            </div>
+
+            <span class="eyebrow" style="display:block; margin:28px 0 14px; color:var(--red);">Eligibility screening</span>
+
+            <div class="field">
+              <label>Last donation date (if any)</label>
+              <input type="date" id="donateLastDonationInput">
+              <span style="display:block; margin-top:6px; font-size:0.78rem; color:var(--muted-dark);">There's usually a required gap of 3+ months between donations.</span>
+            </div>
+
+            <div class="field">
+              <label>Do you have any chronic illness?</label>
+              <div class="radio-group" style="flex-wrap:wrap;">
+                <label class="radio-card" style="min-width:150px; flex:0 1 auto; padding:10px 14px;"><input type="checkbox" name="chronic" value="none" checked><strong style="font-size:0.85rem;">None</strong></label>
+                <label class="radio-card" style="min-width:150px; flex:0 1 auto; padding:10px 14px;"><input type="checkbox" name="chronic" value="diabetes"><strong style="font-size:0.85rem;">Diabetes</strong></label>
+                <label class="radio-card" style="min-width:150px; flex:0 1 auto; padding:10px 14px;"><input type="checkbox" name="chronic" value="hepatitis"><strong style="font-size:0.85rem;">Hepatitis</strong></label>
+                <label class="radio-card" style="min-width:150px; flex:0 1 auto; padding:10px 14px;"><input type="checkbox" name="chronic" value="hiv"><strong style="font-size:0.85rem;">HIV</strong></label>
+                <label class="radio-card" style="min-width:150px; flex:0 1 auto; padding:10px 14px;"><input type="checkbox" name="chronic" value="heart"><strong style="font-size:0.85rem;">Heart disease</strong></label>
+                <label class="radio-card" style="min-width:150px; flex:0 1 auto; padding:10px 14px;"><input type="checkbox" name="chronic" value="cancer"><strong style="font-size:0.85rem;">Cancer</strong></label>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Currently on any medication?</label>
+                <select id="medSelect">
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </div>
+              <div class="field" id="medDetailField" style="display:none;">
+                <label>If yes, please specify</label>
+                <input type="text" id="medDetailInput" placeholder="Medication name">
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Recent surgery, tattoo, or piercing (within 6 months)?</label>
+                <select id="surgerySelect"><option value="no">No</option><option value="yes">Yes</option></select>
+              </div>
+              <div class="field">
+                <label>Recent travel to a malaria / disease-endemic area?</label>
+                <select id="travelSelect"><option value="no">No</option><option value="yes">Yes</option></select>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Recent vaccination?</label>
+                <select id="vaccinationSelect"><option value="no">No</option><option value="yes">Yes</option></select>
+              </div>
+              <div class="field">
+                <label>Alcohol / drug use in the last 24 to 48 hours?</label>
+                <select id="alcoholSelect"><option value="no">No</option><option value="yes">Yes</option></select>
+              </div>
+            </div>
+
+            <div class="field" id="pregnancyField" style="display:none;">
+              <label>Pregnancy or breastfeeding status</label>
+              <select id="pregnancySelect">
+                <option value="na">Not applicable</option>
+                <option value="pregnant">Pregnant</option>
+                <option value="breastfeeding">Breastfeeding</option>
+                <option value="neither">Neither</option>
+              </select>
+            </div>
+
+            <span class="eyebrow" style="display:block; margin:28px 0 14px; color:var(--red);">Contact &amp; logistics</span>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Phone / WhatsApp number</label>
+                <input type="tel" id="donatePhoneInput" placeholder="03XX XXXXXXX" required>
+              </div>
+              <div class="field">
+                <label>City</label>
+                <input type="text" id="donateCityInput" placeholder="e.g. Karachi" required>
+              </div>
+            </div>
+            <div class="field">
+              <label>Address</label>
+              <input type="text" id="donateAddressInput" placeholder="House / street, area" required>
+            </div>
+
+            <div class="field">
+              <label>Willing to donate for</label>
+              <div class="radio-group">
+                <label class="radio-card" id="anyCard">
+                  <input type="radio" name="willing" value="any" checked>
+                  <strong>Any request nearby</strong>
+                  <span>Replacement or direct-need, whichever comes first</span>
+                </label>
+                <label class="radio-card" id="repOnlyCard">
+                  <input type="radio" name="willing" value="rep-only">
+                  <strong>Replacement requests only</strong>
+                  <span>Only when someone needs a replacement donor</span>
+                </label>
+              </div>
+            </div>
+
+            <button class="btn btn-red" type="submit" style="width:100%; padding:14px;">Register as a donor</button>
+          </form>
+
+          <div class="confirm-box" id="donateConfirm">
+            <p>You're registered. Welcome to the network: <span class="id" id="donorId"></span></p>
+            <p style="margin-top:6px; color:var(--muted-dark); font-size:0.88rem;">We'll only reach out on WhatsApp or a call when your group and city match a real request.</p>
+          </div>
+
+        </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONTACT ================= -->
+  <section class="section" id="contact">
+    <div class="band" style="padding-top:64px;">
+      <div class="wrap">
+        <div class="band-head">
+          <span class="eyebrow">Contact Us</span>
+          <h2>Questions, partnerships, or a request that needs a human.</h2>
+        </div>
+        <div class="contact-grid">
+          <div>
+            <div class="contact-item">
+              <div class="icon-box">☎</div>
+              <div><h5>Call us</h5><a href="tel:+923162934656">0316 2934656</a></div>
+            </div>
+            <div class="contact-item">
+              <div class="icon-box">✆</div>
+              <div><h5>WhatsApp</h5><a href="https://wa.me/923162934656" target="_blank" rel="noopener">+92 316 2934656</a></div>
+            </div>
+            <div class="contact-item">
+              <div class="icon-box">◎</div>
+              <div><h5>Follow us</h5><a href="https://www.instagram.com/faiq.ahmedd/" target="_blank" rel="noopener">Instagram: @faiq.ahmedd</a></div>
+            </div>
+          </div>
+
+          <div class="form-wrap" style="max-width:none;">
+            <form id="contactForm">
+              <div class="field-row">
+                <div class="field"><label>Your name</label><input type="text" required></div>
+                <div class="field"><label>Phone or email</label><input type="text" required></div>
+              </div>
+              <div class="field"><label>Message</label><textarea rows="4" placeholder="How can we help?" required></textarea></div>
+              <button class="btn btn-red" type="submit" style="width:100%; padding:14px;">Send message</button>
+            </form>
+            <div class="confirm-box" id="contactConfirm">
+              <p>Message received. We'll get back to you shortly, usually over WhatsApp.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h5>BloodSync</h5>
+        <p style="max-width:260px;">One network for finding and giving blood, anywhere in Pakistan.</p>
+        <button type="button" class="btn btn-outline btn-sm install-btn" data-install style="display:none; margin-top:14px;">Install the app</button>
+      </div>
+      <div class="footer-col">
+        <h5>Navigate</h5>
+        <a href="#" data-route="home">Home</a>
+        <a href="#" data-route="about">About Us</a>
+        <a href="#" data-route="guide">Blood Guide</a>
+        <a href="#" data-route="urgent">Urgent Need</a>
+        <a href="#" data-route="donate">Donate Blood</a>
+      </div>
+      <div class="footer-col">
+        <h5>Contact</h5>
+        <a href="tel:+923162934656">0316 2934656</a>
+        <a href="https://wa.me/923162934656" target="_blank" rel="noopener">WhatsApp</a>
+        <a href="https://www.instagram.com/faiq.ahmedd/" target="_blank" rel="noopener">Instagram</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 BloodSync. Built by Faiq Ahmed.</span>
+      <span>Every request alerts real donors. Use it responsibly.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Pop-up shown the moment a request reaches this donor (page open) -->
+<div class="bs-modal-backdrop" id="incomingModal" style="display:none;" role="alertdialog" aria-modal="true" aria-labelledby="incomingTitle">
+  <div class="bs-modal">
+    <div style="font-family:var(--font-mono); font-size:0.72rem; letter-spacing:0.1em; color:#ff8a85; text-transform:uppercase; margin-bottom:6px;">Urgent request near you</div>
+    <h3 id="incomingTitle">Blood needed</h3>
+    <div id="incomingBody" style="margin:14px 0;"></div>
+    <p class="sub" style="margin:0;">Patient and contact details are shared after you accept.</p>
+    <div id="incomingMore" style="font-size:0.8rem; color:#c9a227; margin-top:8px;"></div>
+    <div class="bs-actions">
+      <button type="button" class="bs-btn bs-btn-ghost" id="popupLater">Later</button>
+      <button type="button" class="bs-btn bs-btn-ghost" id="popupDecline">Decline</button>
+      <button type="button" class="bs-btn bs-btn-red" id="popupAccept">Accept</button>
+    </div>
+  </div>
+</div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+  // ---------- BACKEND CONNECTION ----------
+  // The API address is worked out in bloodsync-shared.js:
+  //   - opened from the backend itself (http://localhost:4000) -> same server, nothing to configure
+  //   - opened from another local server (e.g. VS Code Live Server) -> http://localhost:4000
+  //   - deployed somewhere else? set  window.BLOODSYNC_API_BASE = 'https://your-backend.onrender.com'
+  //     in a <script> tag BEFORE bloodsync-shared.js.
+  const { api, esc, telHref, waHref, mapsLink, fmtDistance, fmtDuration, haversineMeters, validCoords,
+          CANCEL_REASON_LABELS, openCancelDialog, saveMyRequest, getMyToken, getActiveRequestId,
+          clearActiveRequest } = BloodSync;
+  const API_BASE = BloodSync.API_BASE;
+  const $ = (id) => document.getElementById(id);
+
+  // Live updates. If the socket library can't load, the page still works (it falls back to polling).
+  const socket = BloodSync.createSocket();
+
+  function toast(message, kind) {
+    const el = document.createElement('div');
+    el.className = 'toast' + (kind === 'err' ? ' err' : '');
+    el.textContent = message;
+    $('toasts').appendChild(el);
+    setTimeout(() => el.remove(), 5000);
+  }
+
+  // ---------- ROUTING ----------
+  const sections = document.querySelectorAll('.section');
+  const navLinkEls = document.querySelectorAll('[data-route]');
+  function goTo(route){
+    sections.forEach(s => s.classList.toggle('active', s.id === route));
+    document.querySelectorAll('nav.links a').forEach(a => a.classList.toggle('active', a.dataset.route === route));
+    window.scrollTo({top:0, behavior:'smooth'});
+    document.getElementById('mobileLinks').style.display = 'none';
+    if (window.__bsReveal) window.__bsReveal();
+  }
+  navLinkEls.forEach(el => el.addEventListener('click', e => {
+    e.preventDefault();
+    goTo(el.dataset.route);
+  }));
+
+  // mobile menu
+  document.getElementById('hamburger').addEventListener('click', () => {
+    const m = document.getElementById('mobileLinks');
+    m.style.display = m.style.display === 'none' ? 'flex' : 'none';
+  });
+
+  // ---------- LIVE BOARD (real data from the backend) ----------
+  const boardGrid = $('boardGrid');
+  const GROUP_ORDER = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+  let lastCounts = null;
+
+  function statusFor(count) {
+    if (count <= 10) return 'critical';
+    if (count <= 30) return 'low';
+    return 'available';
+  }
+
+  function setLive(online) {
+    $('liveLabel').classList.toggle('offline', !online);
+    $('liveText').textContent = online ? 'LIVE' : 'RECONNECTING…';
+  }
+
+  function renderBoard(counts) {
+    const most = Math.max(1, ...GROUP_ORDER.map((g) => counts[g] || 0));
+    boardGrid.innerHTML = GROUP_ORDER.map(g => {
+      const count = counts[g] || 0;
+      const status = statusFor(count);
+      // Tiles whose number just changed flash green, so a new donor is visibly noticed.
+      const changed = lastCounts && lastCounts[g] !== count;
+      return `
+        <div class="tile${changed ? ' flash' : ''}">
+          <div class="group">${g}</div>
+          <span class="status ${status}">${status}</span>
+          <div class="count">${count} active donors</div>
+          <div class="gauge ${status}" aria-hidden="true"><i style="width:${count ? Math.max(6, Math.round((count / most) * 100)) : 0}%"></i></div>
+        </div>`;
+    }).join('');
+    lastCounts = Object.assign({}, counts);
+  }
+
+  async function loadBoard() {
+    try {
+      const data = await api('/api/board');
+      renderBoard(data.board);
+      setLive(true);
+    } catch (err) {
+      console.error('Could not load live board:', err.message);
+      setLive(false);
+      if (!lastCounts) {
+        boardGrid.innerHTML = `<div style="padding:20px; color:var(--muted); font-family:var(--font-mono); font-size:0.85rem; grid-column:1/-1;">
+          Couldn't reach the BloodSync backend. Make sure it's running at ${esc(API_BASE)}.
+        </div>`;
+      }
+    }
+  }
+
+  // A socket connection forgets its "rooms" whenever it reconnects (for example when the
+  // backend restarts under nodemon), so the room must be re-joined on EVERY connect,
+  // otherwise the board silently stops updating after the first restart.
+  socket.on('connect', () => {
+    socket.emit('board:join');
+    const donorId = localStorage.getItem('bloodsync_donor_id');
+    if (donorId) socket.emit('donor:join', donorId);
+    loadBoard();
+  });
+  socket.on('disconnect', () => setLive(false));
+  socket.on('board:update', loadBoard);
+  // Safety nets in case the socket is blocked by a proxy: poll, and refresh when the tab is shown.
+  setInterval(loadBoard, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) loadBoard(); });
+  loadBoard();
+
+  // ---------- RADIO CARD SELECTION ----------
+  document.querySelectorAll('.radio-group').forEach(group => {
+    const cards = group.querySelectorAll('.radio-card');
+    function refresh(){
+      cards.forEach(c => c.classList.toggle('selected', c.querySelector('input').checked));
+    }
+    cards.forEach(c => c.addEventListener('click', (e) => {
+      const input = c.querySelector('input');
+      if (input.type === 'checkbox') {
+        if (e.target !== input) input.checked = !input.checked;
+      } else {
+        input.checked = true;
+      }
+      // Setting .checked via script doesn't fire a native 'change' event,
+      // dispatch one manually so any listeners (blood-group toggle, etc.) still run.
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      refresh();
+    }));
+    refresh();
+  });
+
+  // "None" chronic-illness checkbox clears the others, and vice versa
+  const chronicBoxes = document.querySelectorAll('input[name="chronic"]');
+  chronicBoxes.forEach(box => {
+    box.addEventListener('change', () => {
+      if (box.value === 'none' && box.checked) {
+        chronicBoxes.forEach(b => { if (b.value !== 'none') { b.checked = false; b.closest('.radio-card').classList.remove('selected'); } });
+      } else if (box.value !== 'none' && box.checked) {
+        const noneBox = document.querySelector('input[name="chronic"][value="none"]');
+        if (noneBox) { noneBox.checked = false; noneBox.closest('.radio-card').classList.remove('selected'); }
+      }
+    });
+  });
+
+  // Show medication detail field only when "Yes" is selected
+  const medSelect = document.getElementById('medSelect');
+  if (medSelect) {
+    medSelect.addEventListener('change', () => {
+      document.getElementById('medDetailField').style.display = medSelect.value === 'yes' ? 'block' : 'none';
+    });
+  }
+
+  // Show pregnancy/breastfeeding field only for female donors
+  const donateGender = document.getElementById('donateGender');
+  if (donateGender) {
+    donateGender.addEventListener('change', () => {
+      document.getElementById('pregnancyField').style.display = donateGender.value === 'Female' ? 'block' : 'none';
+    });
+  }
+
+  // Show "please specify" field only when reason is "Other"
+  const reasonSelect = document.getElementById('reasonSelect');
+  if (reasonSelect) {
+    reasonSelect.addEventListener('change', () => {
+      document.getElementById('reasonOtherField').style.display = reasonSelect.value === 'Other' ? 'block' : 'none';
+    });
+  }
+
+  // Replacement requests don't need a specific blood group, hide that field
+  const bloodGroupField = document.getElementById('bloodGroupField');
+  const bloodGroupSelect = document.getElementById('bloodGroupSelect');
+  function syncBloodGroupField() {
+    const isDirect = document.querySelector('input[name="reqType"]:checked').value === 'direct';
+    bloodGroupField.style.display = isDirect ? 'block' : 'none';
+    bloodGroupSelect.required = isDirect;
+    if (!isDirect) bloodGroupSelect.value = '';
+  }
+  document.querySelectorAll('input[name="reqType"]').forEach(r => r.addEventListener('change', syncBloodGroupField));
+  syncBloodGroupField();
+
+  // ---------- CITY COORDINATES (approximate, for demo map centering) ----------
+  const cityCoords = {
+    "karachi":[24.8607,67.0011],"lahore":[31.5497,74.3436],"islamabad":[33.6844,73.0479],
+    "rawalpindi":[33.5651,73.0169],"faisalabad":[31.4187,73.0791],"multan":[30.1575,71.5249],
+    "peshawar":[34.0151,71.5249],"quetta":[30.1798,66.9750],"sialkot":[32.4945,74.5229],
+    "gujranwala":[32.1877,74.1945],"bahawalpur":[29.3956,71.6836],"sargodha":[32.0836,72.6711],
+    "sukkur":[27.7052,68.8574],"larkana":[27.5590,68.2123],"sheikhupura":[31.7130,73.9783],
+    "jhang":[31.2781,72.3181],"rahim yar khan":[28.4212,70.2989],"gujrat":[32.5740,74.0789],
+    "kasur":[31.1156,74.4502],"mardan":[34.1989,72.0404],"mingora":[34.7717,72.3604],
+    "dera ghazi khan":[30.0561,70.6345],"sahiwal":[30.6682,73.1114],"nawabshah":[26.2442,68.4100],
+    "okara":[30.8081,73.4534],"mirpur khas":[25.5268,69.0113],"chiniot":[31.7202,72.9770],
+    "kamoke":[31.9756,74.2225],"hafizabad":[32.0714,73.6889],"kohat":[33.5900,71.4400],
+    "jacobabad":[28.2818,68.4373],"shikarpur":[27.9558,68.6383],"muzaffargarh":[30.0725,71.1913],
+    "khanpur":[28.6453,70.6567],"gojra":[31.1497,72.6849],"mandi bahauddin":[32.5859,73.4913],
+    "abbottabad":[34.1463,73.2117],"turbat":[26.0034,63.0434],"dera ismail khan":[31.8314,70.9019],
+    "chaman":[30.9214,66.4491],"kot addu":[30.4675,70.9646],"jaranwala":[31.3336,73.4133],
+    "muridke":[31.8028,74.2649],"pakpattan":[30.3400,73.3900],"vehari":[30.0333,72.3500],
+    "jhelum":[32.9425,73.7257],"sadiqabad":[28.3078,70.1290],"kabirwala":[30.4056,71.8639],
+    "khanewal":[30.3013,71.9319],"toba tek singh":[30.9700,72.4800],"wazirabad":[32.4425,74.1250],
+    "attock":[33.7666,72.3639],"bahawalnagar":[29.9989,73.2578],"mianwali":[32.5850,71.5470],
+    "layyah":[30.9693,70.9428],"bhakkar":[31.6244,71.0653],"chishtian":[29.7964,72.8608],
+    "nowshera":[34.0150,71.9747],"swabi":[34.1200,72.4700],"muzaffarabad":[34.3700,73.4711]
+  };
+  function resolveCityCoords(cityText) {
+    const key = (cityText || '').toLowerCase().trim();
+    for (const c in cityCoords) { if (key.includes(c)) return cityCoords[c]; }
+    return cityCoords["karachi"];
+  }
+
+  // Tries the browser's real geolocation first (with the person's permission);
+  // falls back to the typed city's approximate center if denied/unavailable.
+  // Returns [lng, lat], the order MongoDB/GeoJSON expects (not [lat, lng]).
+  function getCoordinates(cityFallbackText) {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        const [lat, lng] = resolveCityCoords(cityFallbackText);
+        return resolve([lng, lat]);
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve([pos.coords.longitude, pos.coords.latitude]),
+        () => {
+          const [lat, lng] = resolveCityCoords(cityFallbackText);
+          resolve([lng, lat]);
+        },
+        { timeout: 5000 }
+      );
+    });
+  }
+
+  // ---------- REQUESTER: location helpers ----------
+  // Order of preference for where the patient is:
+  //   1. the requester's device GPS            (most precise, usually they are at the hospital)
+  //   2. the hospital address, geocoded via OpenStreetMap Nominatim
+  //   3. the centre of the typed city           (least precise, donors are warned about this)
+  function getDeviceLocation() {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) return resolve(null);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve([pos.coords.longitude, pos.coords.latitude]),
+        () => resolve(null),
+        { timeout: 7000, enableHighAccuracy: true }
+      );
+    });
+  }
+
+  async function geocodeHospital(name, area) {
+    const q = [name, area, 'Pakistan'].filter(Boolean).join(', ');
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4500);
+    try {
+      const res = await fetch(
+        'https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=pk&accept-language=en&q=' + encodeURIComponent(q),
+        { signal: controller.signal, headers: { Accept: 'application/json' } }
+      );
+      const rows = await res.json();
+      if (rows && rows[0]) return [parseFloat(rows[0].lon), parseFloat(rows[0].lat)];
+    } catch (_) { /* offline / blocked / slow, fall through to the next option */ }
+    finally { clearTimeout(timer); }
+    return null;
+  }
+
+  async function getRequestLocation(hospitalName, hospitalArea) {
+    const gps = await getDeviceLocation();
+    if (gps) return { coordinates: gps, source: 'gps' };
+    const geocoded = await geocodeHospital(hospitalName, hospitalArea);
+    if (geocoded) return { coordinates: geocoded, source: 'geocoded' };
+    const [lat, lng] = resolveCityCoords(hospitalArea);
+    return { coordinates: [lng, lat], source: 'city-fallback' };
+  }
+
+  // ---------- REQUESTER: submit a request, show tracking + "Cancel My Request" ----------
+  function trackingUrl(requestId, token) {
+    // The cancel token is handed to the tracking page in the URL *hash* (never sent to a server);
+    // that page stores it and removes it from the address bar immediately.
+    return `tracking.html?requestId=${encodeURIComponent(requestId)}` + (token ? `#k=${encodeURIComponent(token)}` : '');
+  }
+
+  const REQUEST_STATUS_TEXT = {
+    searching: ['Request submitted.', 'Nearby donors are being alerted right now.'],
+    matched: ['A donor accepted!', 'Open live tracking to see their details and location.'],
+    'in-transit': ['Your donor is on the way.', 'Open live tracking to follow them.'],
+    completed: ['Donation completed.', 'Thank you for using BloodSync.'],
+    cancelled: ['Request cancelled.', 'Donors who were alerted have been told.'],
+    'no-donors-available': ['No donors available right now.', 'You can keep this open or cancel it.']
+  };
+  let shownRequest = null; // { id, url }
+
+  function renderRequestBox(status) {
+    const [title, text] = REQUEST_STATUS_TEXT[status] || REQUEST_STATUS_TEXT.searching;
+    $('arTitle').textContent = title;
+    $('arText').textContent = text;
+    const live = ['searching', 'matched', 'in-transit', 'no-donors-available'].includes(status);
+    $('cancelMyRequestBtn').style.display = live && getMyToken(shownRequest.id) ? '' : 'none';
+    $('arSub').style.display = live ? '' : 'none';
+    $('shareRow').style.display = live ? '' : 'none';
+    if (!live) clearActiveRequest(shownRequest.id);
+  }
+
+  function showRequestBox(requestId, status, { fromHash } = {}) {
+    const url = trackingUrl(requestId, fromHash ? getMyToken(requestId) : null);
+    shownRequest = { id: requestId, url };
+    $('openTrackingBtn').href = url;
+    $('urgentResults').classList.add('show');
+    renderRequestBox(status);
+    socket.emit('request:join', requestId); // live status for this box
+  }
+
+  socket.on('request:status', (p) => { if (shownRequest) renderRequestBox(p.status); });
+  socket.on('connect', () => { if (shownRequest) socket.emit('request:join', shownRequest.id); });
+
+  // ---------- REQUESTER: live reach estimate + sharing ----------
+  function refreshReach() {
+    const area = $('hospitalAreaInput').value.trim();
+    const direct = document.querySelector('input[name="reqType"]:checked').value === 'direct';
+    if (area.length < 3 || (direct && !bloodGroupSelect.value)) { $('reachBox').style.display = 'none'; return; }
+    const [lat, lng] = resolveCityCoords(area);
+    BloodSync.extras.updateReach({
+      coordinates: [lng, lat],
+      type: direct ? 'direct-need' : 'replacement',
+      bloodGroup: bloodGroupSelect.value,
+      areaLabel: area
+    });
+  }
+  $('hospitalAreaInput').addEventListener('input', refreshReach);
+  bloodGroupSelect.addEventListener('change', refreshReach);
+  document.querySelectorAll('input[name="reqType"]').forEach((r) => r.addEventListener('change', refreshReach));
+
+  let shareInfo = null;
+  function setShareInfo(r) {
+    shareInfo = { type: r.type, bloodGroup: r.bloodGroup, units: r.unitsRequired, hospitalName: r.hospital.name, hospitalArea: r.hospital.area, contact: r.requester && r.requester.contact };
+  }
+  BloodSync.extras.wireShare($('shareRow'), () => BloodSync.logic.buildShareText(Object.assign({ origin: location.origin }, shareInfo)), toast);
+
+  $('urgentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    try {
+      const isDirect = document.querySelector('input[name="reqType"]:checked').value === 'direct';
+      const hospitalName = $('hospitalNameInput').value.trim() || 'Hospital';
+      const hospitalArea = $('hospitalAreaInput').value.trim() || 'Karachi';
+      const location = await getRequestLocation(hospitalName, hospitalArea);
+      const reason = reasonSelect.value === 'Other' ? ($('reasonOtherInput').value || 'Other') : reasonSelect.value;
+
+      const payload = {
+        type: isDirect ? 'direct-need' : 'replacement',
+        patient: {
+          name: $('patientNameInput').value.trim(),
+          age: Number($('patientAgeInput').value) || 0,
+          gender: $('patientGenderSelect').value || 'Prefer not to say'
+        },
+        bloodGroup: isDirect ? (bloodGroupSelect.value || 'O+') : 'O+', // ignored by the matching engine when type is 'replacement'
+        unitsRequired: Number($('unitsInput').value) || 1,
+        reason,
+        hospital: { name: hospitalName, area: hospitalArea },
+        doctor: { name: $('doctorNameInput').value.trim(), contact: $('doctorContactInput').value.trim() },
+        requester: {
+          relationship: $('relationshipSelect').value || 'Other',
+          contact: $('requesterContactInput').value.trim()
+        },
+        notes: $('notesInput').value.trim(),
+        coordinates: location.coordinates,
+        locationSource: location.source
+      };
+
+      const request = await api('/api/requests', { method: 'POST', body: payload });
+      saveMyRequest(request._id, request.requesterToken);
+      showRequestBox(request._id, request.status, { fromHash: true });
+      setShareInfo(request);
+
+      const tab = window.open(shownRequest.url, '_blank');
+      $('arSub').innerHTML = tab
+        ? 'Your live tracking page opened in a new tab.'
+        : 'Your browser blocked the new tab. Use the “Open live tracking” button.';
+      $('urgentResults').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      if (location.source === 'city-fallback') {
+        toast('We could not pinpoint the hospital, so donors will see an approximate location. Add the exact hospital name and area, or allow location access.', 'err');
+      }
+    } catch (err) {
+      alert(`Could not submit request: ${err.message}`);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Search nearest donors';
+    }
+  });
+
+  $('reopenTrackingLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (shownRequest) window.open(shownRequest.url, '_blank');
+  });
+
+  $('cancelMyRequestBtn').addEventListener('click', () => {
+    if (!shownRequest) return;
+    openCancelDialog({
+      requestId: shownRequest.id,
+      onCancelled: () => { renderRequestBox('cancelled'); toast('Your request was cancelled and donors were told.'); }
+    });
+  });
+
+  // Returning to the page: bring back the request this browser still has open.
+  (async function restoreMyRequest() {
+    const id = getActiveRequestId();
+    if (!id || !getMyToken(id)) return;
+    try {
+      const r = await api(`/api/requests/${id}`);
+      if (['searching', 'matched', 'in-transit', 'no-donors-available'].includes(r.status)) {
+        showRequestBox(id, r.status);
+        setShareInfo(r);
+        $('arSub').innerHTML = 'You have a request in progress. Open live tracking to follow it or cancel it.';
+      } else {
+        clearActiveRequest(id);
+      }
+    } catch (_) { /* server down or request gone, nothing to restore */ }
+  })();
+
+  // ---------- DONOR: Web Push (works even when this page is closed) ----------
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+  }
+
+  function sameKey(existingBuffer, wanted) {
+    if (!existingBuffer) return false;
+    const a = new Uint8Array(existingBuffer);
+    return a.length === wanted.length && a.every((v, i) => v === wanted[i]);
+  }
+
+  const PUSH_MESSAGES = {
+    unsupported: ['This browser can’t receive background alerts. You’ll still get a pop-up while this page is open.', false],
+    insecure: ['Background alerts need the site opened at http://localhost:4000 (or https). You’ll still get pop-ups while this page is open.', false],
+    denied: ['Notifications are blocked for this site. Allow them in your browser’s site settings to be alerted when this page is closed.', false],
+    default: ['Turn on notifications to be alerted even when this page is closed.', true],
+    enabled: ['🔔 Notifications are on. You’ll be alerted even when this page is closed.', false],
+    'not-configured': ['The server has no push keys set up yet, so only in-page pop-ups work. (Run npm run generate-vapid-keys.)', false],
+    error: ['Couldn’t switch on background alerts. Pop-ups still work while this page is open.', true]
+  };
+  function setPushUI(state, detail) {
+    const [text, showButton] = PUSH_MESSAGES[state] || PUSH_MESSAGES.error;
+    $('notifStatus').textContent = detail && state === 'error' ? `${text} (${detail})` : text;
+    $('enableNotifBtn').style.display = showButton ? '' : 'none';
+  }
+
+  async function ensurePush({ prompt }) {
+    const donorId = localStorage.getItem('bloodsync_donor_id');
+    if (!donorId) return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return setPushUI('unsupported');
+    if (!window.isSecureContext) return setPushUI('insecure');
+
+    try {
+      let permission = Notification.permission;
+      if (permission === 'default' && prompt) permission = await Notification.requestPermission();
+      if (permission === 'denied') return setPushUI('denied');
+      if (permission !== 'granted') return setPushUI('default');
+
+      // The public key comes from the server, so it can never be out of step with the
+      // private key the server signs with (a mismatch makes every push fail silently).
+      const config = await api('/api/config');
+      const publicKey = config.vapidPublicKey || window.BLOODSYNC_VAPID_PUBLIC_KEY;
+      if (!publicKey) return setPushUI('not-configured');
+      const appKey = urlBase64ToUint8Array(publicKey);
+
+      await navigator.serviceWorker.register('sw.js');
+      const registration = await navigator.serviceWorker.ready;
+
+      let subscription = await registration.pushManager.getSubscription();
+      if (subscription && !sameKey(subscription.options && subscription.options.applicationServerKey, appKey)) {
+        await subscription.unsubscribe(); // made with an old/different key, it could never deliver
+        subscription = null;
+      }
+      if (!subscription) {
+        subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: appKey });
+      }
+
+      await api(`/api/donors/${donorId}/push-subscription`, {
+        method: 'POST',
+        body: { subscription: subscription.toJSON() }
+      });
+      setPushUI('enabled');
+    } catch (err) {
+      console.warn('Push setup failed:', err);
+      setPushUI('error', err.message);
+    }
+  }
+
+  $('enableNotifBtn').addEventListener('click', () => ensurePush({ prompt: true }));
+
+  // Tapping a notification while a BloodSync tab is open: the service worker tells that tab which request to show.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'open-request') {
+        goTo('donate');
+        loadMyRequests({ openRequestId: event.data.requestId });
+      }
+    });
+  }
+
+  // ---------- DONOR: incoming-request POP-UP ----------
+  const originalTitle = document.title;
+  const shownPopupIds = new Set();   // each request pops up once per page visit
+  let popupQueue = [];
+  let currentPopup = null;           // the request (preview) currently in the pop-up
+  const pendingById = new Map();     // request id -> latest preview, for the waiting list
+
+  function groupLabel(r) { return r.type === 'direct-need' ? r.bloodGroup : 'Any compatible group'; }
+  function kmText(km) { return km < 1 ? 'less than 1 km' : `~${km} km`; }
+
+  function previewSummaryHTML(r) {
+    return `
+      <div class="kv" style="border-color:rgba(241,237,230,.1);"><span style="color:#8b93a1">Blood needed</span><strong>${esc(groupLabel(r))} · ${esc(r.unitsRequired)} unit(s)</strong></div>
+      <div class="kv" style="border-color:rgba(241,237,230,.1);"><span style="color:#8b93a1">Hospital</span><strong>${esc(r.hospital.name)}, ${esc(r.hospital.area)}</strong></div>
+      <div class="kv" style="border-color:rgba(241,237,230,.1);"><span style="color:#8b93a1">Reason</span><strong>${esc(r.reason)}</strong></div>
+      <div class="kv" style="border-color:rgba(241,237,230,.1);"><span style="color:#8b93a1">Patient</span><strong>${esc(r.patient.age)} yrs, ${esc(r.patient.gender)}</strong></div>
+      ${r.distanceKm !== null && r.distanceKm !== undefined ? `<div class="kv" style="border-color:rgba(241,237,230,.1);"><span style="color:#8b93a1">Distance from you</span><strong>${esc(kmText(r.distanceKm))}</strong></div>` : ''}`;
+  }
+
+  function showNextPopup() {
+    const item = popupQueue.shift();
+    if (!item) { currentPopup = null; $('incomingModal').style.display = 'none'; document.title = originalTitle; return; }
+    currentPopup = item.request;
+    $('incomingTitle').textContent = `${groupLabel(currentPopup)} needed near you`;
+    $('incomingBody').innerHTML = previewSummaryHTML(currentPopup);
+    $('incomingMore').textContent = popupQueue.length ? `+${popupQueue.length} more request(s) waiting after this one` : '';
+    $('incomingModal').style.display = 'flex';
+    document.title = '🩸 Blood needed | BloodSync';
+  }
+
+  function queuePopup(request, force) {
+    if (activeDonation) return;                 // already committed to a donation
+    if (shownPopupIds.has(request._id) && !force) return;
+    shownPopupIds.add(request._id);
+    popupQueue.push({ request });
+    if (!currentPopup) showNextPopup();
+  }
+
+  function dismissPopup() { showNextPopup(); }
+  function dropRequestFromPopups(requestId) {
+    popupQueue = popupQueue.filter((i) => i.request._id !== requestId);
+    if (currentPopup && currentPopup._id === requestId) showNextPopup();
+  }
+
+  $('popupLater').addEventListener('click', dismissPopup);
+  $('popupAccept').addEventListener('click', () => currentPopup && respondToRequest(currentPopup._id, 'accept'));
+  $('popupDecline').addEventListener('click', () => currentPopup && respondToRequest(currentPopup._id, 'decline'));
+
+  // ---------- DONOR: "Requests waiting on you" ----------
+  function renderMyRequests(items) {
+    const list = $('myRequestsList');
+    if (!items.length) {
+      list.textContent = 'Nothing pending right now. We’ll alert you the moment a nearby request matches.';
+      return;
+    }
+    list.innerHTML = items.map((n) => {
+      const r = n.request;
+      const dist = r.distanceKm !== null && r.distanceKm !== undefined ? ` · ${esc(kmText(r.distanceKm))} away` : '';
+      return `
+        <div class="donor-card" style="margin-bottom:10px;">
+          <div class="donor-meta">
+            <strong>${esc(groupLabel(r))} needed · ${esc(r.unitsRequired)} unit(s)</strong>
+            <span>${esc(r.hospital.name)}, ${esc(r.hospital.area)} · ${esc(r.reason)}${dist}</span>
+          </div>
+          <div class="donor-actions">
+            <button type="button" class="btn btn-outline decline-btn" data-request="${esc(r._id)}">Decline</button>
+            <button type="button" class="btn btn-red accept-btn" data-request="${esc(r._id)}">Accept</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function loadMyRequests({ openRequestId = null, manual = false } = {}) {
+    const donorId = localStorage.getItem('bloodsync_donor_id');
+    if (!donorId) { if (manual) toast('Register as a donor first.', 'err'); return; }
+    const refreshBtn = $('refreshRequestsBtn');
+    if (manual) { refreshBtn.disabled = true; refreshBtn.textContent = 'Refreshing…'; }
+
+    try {
+      const items = await api(`/api/donors/${donorId}/notifications`);
+      pendingById.clear();
+      items.forEach((n) => pendingById.set(n.request._id, n.request));
+      renderMyRequests(items);
+      items.forEach((n) => queuePopup(n.request, n.request._id === openRequestId));
+      if (manual) toast(items.length ? `${items.length} request(s) waiting on you.` : 'No new requests right now.');
+    } catch (err) {
+      $('myRequestsList').innerHTML = `<span style="color:#b3261e;">${esc(err.status === 404 ? 'Your donor record wasn’t found on the server. Please register again.' : err.message)}</span>`;
+      if (manual) toast(err.message, 'err');
+    } finally {
+      if (manual) { refreshBtn.disabled = false; refreshBtn.textContent = 'Refresh'; }
+    }
+  }
+
+  // One delegated listener, so buttons keep working however many times the list is redrawn.
+  $('myRequestsList').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-request]');
+    if (!btn) return;
+    respondToRequest(btn.dataset.request, btn.classList.contains('accept-btn') ? 'accept' : 'decline');
+  });
+  $('refreshRequestsBtn').addEventListener('click', () => loadMyRequests({ manual: true }));
+
+  async function respondToRequest(requestId, action) {
+    const donorId = localStorage.getItem('bloodsync_donor_id');
+    if (!donorId) { toast('Register as a donor first.', 'err'); return; }
+
+    const buttons = [...document.querySelectorAll(`#myRequestsList button[data-request="${CSS.escape(requestId)}"]`),
+                     $('popupAccept'), $('popupDecline')];
+    const labels = buttons.map((b) => b.textContent);
+    buttons.forEach((b) => { b.disabled = true; });
+    const busyLabel = action === 'accept' ? 'Accepting…' : 'Declining…';
+    const mainBtn = action === 'accept' ? $('popupAccept') : $('popupDecline');
+    mainBtn.textContent = busyLabel;
+    document.querySelectorAll(`#myRequestsList .${action}-btn[data-request="${CSS.escape(requestId)}"]`).forEach((b) => { b.textContent = busyLabel; });
+
+    try {
+      const data = await api(`/api/requests/${requestId}/${action}`, { method: 'PATCH', body: { donorId } });
+      pendingById.delete(requestId);
+      dropRequestFromPopups(requestId);
+      if (action === 'accept') {
+        toast('Thank you! The patient’s details and the shortest route are below.');
+        await showActiveDonation(data, { reveal: true });
+      } else {
+        toast('Declined. We’ll offer it to other donors.');
+      }
+      loadMyRequests();
+    } catch (err) {
+      toast(err.message, 'err');
+      if (err.status === 409 || err.status === 403) { dropRequestFromPopups(requestId); loadMyRequests(); }
+    } finally {
+      buttons.forEach((b, i) => { b.disabled = false; b.textContent = labels[i]; });
+    }
+  }
+
+  // ---------- DONOR: live events (pop-ups, withdrawals) ----------
+  socket.on('donor:request', ({ request }) => {
+    queuePopup(request);
+    loadMyRequests();
+  });
+
+  socket.on('donor:closed', ({ requestId, reason, cancelReason }) => {
+    pendingById.delete(requestId);
+    const wasShowing = currentPopup && currentPopup._id === requestId;
+    dropRequestFromPopups(requestId);
+    if (activeDonation && activeDonation.request._id === requestId) {
+      const why = CANCEL_REASON_LABELS[cancelReason];
+      endDonation(`The requester cancelled this request${why ? ` (${why.toLowerCase()})` : ''}. You don’t need to travel. Thank you for being ready to help.`);
+    } else if (wasShowing) {
+      toast(reason === 'cancelled' ? 'The requester cancelled this request.' : 'Another donor already accepted this request.');
+    }
+    loadMyRequests();
+  });
+
+  // ---------- DONOR: accepted donation: details, shortest-route map, live location ----------
+  let activeDonation = null;   // { request, donorInfo }
+  let donationMap = null, hospitalMarker = null, myMarker = null;   // donationMap is a BSMap (Google Maps wrapper)
+  let watchId = null, myPos = null, sending = false, lastSentAt = 0, flushTimer = null, latestToSend = null;
+  let routing = false, lastRoute = { at: 0, from: null, fitted: false };
+
+  function setShareStatus(state) {
+    const el = $('shareLine');
+    if (!el) return;
+    const text = {
+      waiting: 'Waiting for your location… please allow location access when your browser asks.',
+      sharing: '<span class="live-dot"></span>Sharing your live location with the requester until the donation is finished.',
+      retrying: 'Couldn’t send your location just now. Retrying…',
+      denied: 'Location access is blocked, so the requester can’t see you moving. Allow it in your browser’s site settings. The route below starts from your registered address.',
+      unavailable: 'Your device couldn’t find its location. The route starts from your registered address.',
+      unsupported: 'This device can’t share a live location. The route starts from your registered address.'
+    }[state];
+    el.innerHTML = text;
+  }
+
+  function renderDonation() {
+    const { request: r } = activeDonation;
+    $('adReqId').textContent = r.requestId;
+    $('adStatus').textContent = r.status === 'in-transit' ? 'On the way' : 'Accepted';
+    const [lng, lat] = r.location || [];
+    const approx = r.locationSource !== 'gps'
+      ? `<div class="warn-note" style="margin:12px 0 0;">${r.locationSource === 'geocoded'
+          ? 'The hospital location was found from its address, so it may be a little off.'
+          : 'The requester’s exact location wasn’t available, so the map pin is only approximate. Call them to confirm the exact place before you travel.'}</div>` : '';
+
+    $('donationDetails').innerHTML = `
+      <div class="kv"><span>Patient</span><strong>${esc(r.patient.name)} · ${esc(r.patient.age)} yrs · ${esc(r.patient.gender)}</strong></div>
+      <div class="kv"><span>Needs</span><strong>${esc(groupLabel(r))} · ${esc(r.unitsRequired)} unit(s) · ${esc(r.reason)}</strong></div>
+      <div class="kv"><span>Patient is at</span>
+        <span style="text-align:right;"><strong>${esc(r.hospital.name)}</strong><br>${esc(r.hospital.area)}
+        ${validCoords(r.location) ? `<br><a href="${esc(mapsLink(lat, lng))}" target="_blank" rel="noopener" style="color:var(--red); text-decoration:underline;">Open in Google Maps</a>` : ''}</span></div>
+      <div class="kv"><span>Contact (${esc(r.requester.relationship)})</span>
+        <span><strong>${esc(r.requester.contact)}</strong>
+        <span class="contact-actions" style="display:flex;">
+          <a class="btn btn-green" href="${esc(telHref(r.requester.contact))}">📞 Call</a>
+          <a class="btn btn-outline" href="${esc(waHref(r.requester.contact))}" target="_blank" rel="noopener">WhatsApp</a>
+        </span></span></div>
+      ${r.doctor ? `<div class="kv"><span>Doctor</span><span><strong>${esc(r.doctor.name || 'N/A')}</strong>${r.doctor.contact ? `<br>${esc(r.doctor.contact)}
+        <span class="contact-actions" style="display:flex;"><a class="btn btn-outline" href="${esc(telHref(r.doctor.contact))}">📞 Call doctor</a></span>` : ''}</span></div>` : ''}
+      ${r.notes ? `<div class="kv"><span>Notes</span><span>${esc(r.notes)}</span></div>` : ''}
+      ${approx}
+      <div class="share-line" id="shareLine"></div>
+      <div class="donation-actions">
+        ${r.status === 'matched'
+          ? '<button type="button" class="btn btn-red" id="startTripBtn">I’m on my way</button>'
+          : '<button type="button" class="btn btn-green" id="completeBtn">Donation complete</button>'}
+      </div>`;
+    setShareStatus(watchId === null ? 'waiting' : (myPos ? 'sharing' : 'waiting'));
+
+    const startBtn = $('startTripBtn');
+    if (startBtn) startBtn.addEventListener('click', startTrip);
+    const doneBtn = $('completeBtn');
+    if (doneBtn) doneBtn.addEventListener('click', completeDonation);
+  }
+
+  // Creates the Google map (first time only) and puts the hospital marker on it.
+  // If Google Maps can't load (no key, offline...) the box explains why and the rest of the
+  // donation screen: details, contact buttons, route text, keeps working.
+  async function initDonationMap() {
+    const r = activeDonation.request;
+    const box = $('donationMap');
+    if (!donationMap) {
+      box.innerHTML = '';
+      try {
+        donationMap = await BloodSync.createMap(box, { center: validCoords(r.location) ? r.location : [69.3451, 30.3753], zoom: 14 });
+      } catch (err) {
+        BloodSync.showMapError(box, err);
+        return;
+      }
+    }
+    if (!activeDonation) return;
+    donationMap.clearMarkers();
+    donationMap.clearRoute();
+    hospitalMarker = myMarker = null;
+    if (validCoords(r.location)) {
+      hospitalMarker = donationMap.addMarker('hospital', r.location, {
+        title: r.hospital.name, infoHtml: `<b>${esc(r.hospital.name)}</b><br>${esc(r.hospital.area)}`
+      });
+      donationMap.setView(r.location, 14);
+    }
+    if (myPos) myMarker = donationMap.addMarker('you', myPos, { title: 'You', infoHtml: '<b>You</b>' });
+    lastRoute = { at: 0, from: null, fitted: false };
+  }
+
+  function routeOrigin() {
+    return myPos || (activeDonation.donorInfo && validCoords(activeDonation.donorInfo.location) ? activeDonation.donorInfo.location : null);
+  }
+
+  // Work out the shortest route from the donor to the patient and show it (text always; drawn on the
+  // map when there is one). Re-calculated as the donor moves, not on every GPS tick.
+  async function drawDonationRoute(force) {
+    if (!activeDonation) return;
+    const from = routeOrigin();
+    const to = activeDonation.request.location;
+    if (!from || !validCoords(to)) return;
+    const moved = lastRoute.from ? haversineMeters(lastRoute.from, from) : Infinity;
+    if (!force && (routing || (Date.now() - lastRoute.at < 20000 && moved < 250))) return;
+
+    routing = true;
+    try {
+      const route = await BloodSync.fetchRoute(from, to);
+      if (!activeDonation) return;
+      lastRoute.at = Date.now(); lastRoute.from = from;
+      if (donationMap) {
+        donationMap.showRoute(route);
+        // Frame the whole route the first time, and again if the donor drives out of view.
+        const meVisible = !myMarker || donationMap.isVisible(myMarker.getPosition());
+        if (!lastRoute.fitted || !meVisible) { donationMap.fitRoute(40); lastRoute.fitted = true; }
+      }
+      $('routeSummary').innerHTML = route.source !== 'straight-line'
+        ? `<strong>${esc(fmtDistance(route.shortest.distanceMeters))} · about ${esc(fmtDuration(route.shortest.durationSeconds))}</strong> by the shortest route (red). ${route.alternatives.length ? 'Grey dashed lines are longer alternatives.' : ''}`
+        : `<strong>${esc(fmtDistance(route.shortest.distanceMeters))}</strong> in a straight line. The routing service is unavailable right now, so roads aren’t shown.`;
+    } catch (err) {
+      $('routeSummary').textContent = 'Couldn’t work out a route right now. Use “Open in Google Maps” for directions.';
+    } finally {
+      routing = false;
+    }
+  }
+
+  // ----- live location sharing -----
+  function sendLocationNow(coords) {
+    if (!activeDonation || sending) return;
+    sending = true;
+    lastSentAt = Date.now();
+    api(`/api/requests/${activeDonation.request._id}/location`, {
+      method: 'PATCH',
+      body: { donorId: localStorage.getItem('bloodsync_donor_id'), coordinates: coords }
+    }).then(() => setShareStatus('sharing'))
+      .catch((err) => {
+        if (err.status === 409) endDonation('This request is no longer active, so location sharing has stopped.');
+        else setShareStatus('retrying');
+      })
+      .finally(() => { sending = false; });
+  }
+
+  // At most one update every ~4 s, but always followed by a final one so the last position isn't lost.
+  function queueLocationSend(coords) {
+    latestToSend = coords;
+    const wait = 4000 - (Date.now() - lastSentAt);
+    if (wait <= 0) { sendLocationNow(coords); latestToSend = null; return; }
+    if (!flushTimer) {
+      flushTimer = setTimeout(() => {
+        flushTimer = null;
+        if (latestToSend) { sendLocationNow(latestToSend); latestToSend = null; }
+      }, wait);
+    }
+  }
+
+  function onMyPosition(pos) {
+    myPos = [pos.coords.longitude, pos.coords.latitude];
+    if (donationMap) {
+      if (!myMarker) myMarker = donationMap.addMarker('you', myPos, { title: 'You', infoHtml: '<b>You</b>' });
+      else myMarker.setPosition(myPos);
+    }
+    queueLocationSend(myPos);
+    drawDonationRoute(false);
+  }
+
+  function onMyPositionError(err) {
+    setShareStatus(err.code === 1 ? 'denied' : 'unavailable');
+    drawDonationRoute(true); // fall back to the registered address as the starting point
+  }
+
+  function startSharingLocation() {
+    stopSharingLocation();
+    if (!navigator.geolocation) { setShareStatus('unsupported'); drawDonationRoute(true); return; }
+    setShareStatus('waiting');
+    watchId = navigator.geolocation.watchPosition(onMyPosition, onMyPositionError, {
+      enableHighAccuracy: true, maximumAge: 5000, timeout: 20000
+    });
+  }
+
+  function stopSharingLocation() {
+    if (watchId !== null && navigator.geolocation) navigator.geolocation.clearWatch(watchId);
+    watchId = null; myPos = null; latestToSend = null;
+    clearTimeout(flushTimer); flushTimer = null;
+  }
+
+  async function showActiveDonation(data, { reveal } = {}) {
+    activeDonation = { request: data.request, donorInfo: data.donor };
+    $('donationEndedNote').style.display = 'none';
+    $('donorDashboard').style.display = 'block';
+    $('activeDonation').style.display = 'block';
+    renderDonation();
+    startSharingLocation();            // GPS sharing never waits for the map to load
+    await initDonationMap();
+    drawDonationRoute(true);
+    if (reveal) {
+      goTo('donate');
+      setTimeout(() => $('activeDonation').scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+    }
+  }
+
+  function endDonation(message, { good } = {}) {
+    stopSharingLocation();
+    activeDonation = null;
+    $('activeDonation').style.display = 'none';
+    const note = $('donationEndedNote');
+    note.textContent = message;
+    note.className = 'warn-note' + (good ? ' ok' : '');
+    note.style.display = 'block';
+    toast(message);
+    loadMyRequests();
+    loadDonorPanel(); // level and donation count may have just changed
+  }
+
+  async function startTrip() {
+    const btn = $('startTripBtn');
+    btn.disabled = true; btn.textContent = 'Starting…';
+    try {
+      await api(`/api/requests/${activeDonation.request._id}/start-transit`, {
+        method: 'PATCH', body: { donorId: localStorage.getItem('bloodsync_donor_id') }
+      });
+      activeDonation.request.status = 'in-transit';
+      renderDonation();
+      toast('Safe travels! The requester can see you coming.');
+    } catch (err) {
+      toast(err.message, 'err');
+      btn.disabled = false; btn.textContent = 'I’m on my way';
+    }
+  }
+
+  async function completeDonation() {
+    const btn = $('completeBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      await api(`/api/requests/${activeDonation.request._id}/complete`, {
+        method: 'PATCH', body: { donorId: localStorage.getItem('bloodsync_donor_id') }
+      });
+      endDonation('Thank you! You may have just saved a life. You’ll be able to donate again after a 3-month gap.', { good: true });
+    } catch (err) {
+      toast(err.message, 'err');
+      btn.disabled = false; btn.textContent = 'Donation complete';
+    }
+  }
+
+  async function restoreActiveDonation() {
+    const donorId = localStorage.getItem('bloodsync_donor_id');
+    try {
+      const data = await api(`/api/donors/${donorId}/active-request`);
+      if (data.request) await showActiveDonation(data, { reveal: false });
+    } catch (err) { console.warn('Could not check for an active donation:', err.message); }
+  }
+
+  // ---------- DONOR: session (runs on page load for a returning donor, and right after registering) ----------
+  let sessionPoll = null;
+  let lastDonor = null;
+  async function loadDonorPanel() {
+    const donorId = localStorage.getItem('bloodsync_donor_id');
+    if (!donorId) return;
+    try {
+      lastDonor = await api(`/api/donors/${donorId}`);
+      BloodSync.extras.renderDonorPanel(lastDonor);
+    } catch (err) { console.warn('Could not load donor summary:', err.message); }
+  }
+  $('pauseBtn').addEventListener('click', async () => {
+    const btn = $('pauseBtn'); const next = btn.dataset.next || 'inactive';
+    btn.disabled = true;
+    try {
+      await api(`/api/donors/${localStorage.getItem('bloodsync_donor_id')}`, { method: 'PATCH', body: { status: next } });
+      toast(next === 'inactive' ? 'Alerts paused. You will not be disturbed.' : 'Alerts are back on.');
+      await loadDonorPanel();
+    } catch (err) { toast(err.message, 'err'); }
+    finally { btn.disabled = false; }
+  });
+  $('cardBtn').addEventListener('click', () => { if (lastDonor) BloodSync.extras.downloadDonorCard(lastDonor); else toast('Your donor details are still loading.', 'err'); });
+
+  async function startDonorSession({ openRequestId = null } = {}) {
+    const donorId = localStorage.getItem('bloodsync_donor_id');
+    if (!donorId) return;
+    $('donorDashboard').style.display = 'block';
+    $('dashDonorLabel').textContent = localStorage.getItem('bloodsync_donor_label') || '';
+    socket.emit('donor:join', donorId);
+    loadDonorPanel();
+    ensurePush({ prompt: false });
+    // Restore any donation already in progress BEFORE listing new requests, so a donor
+    // who is already committed to a patient isn't popped up with another request.
+    await restoreActiveDonation();
+    loadMyRequests({ openRequestId });
+    if (!sessionPoll) sessionPoll = setInterval(() => loadMyRequests(), 20000);
+  }
+
+  // ---------- DONOR: registration ----------
+  document.getElementById('donateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Registering…';
+
+    const chronicChecked = Array.from(document.querySelectorAll('input[name="chronic"]:checked')).map((c) => c.value);
+    const chronicIllness =
+      chronicChecked.length === 0 || chronicChecked.includes('none')
+        ? 'None'
+        : chronicChecked.filter((v) => v !== 'none').join(', ');
+
+    const city = document.getElementById('donateCityInput').value;
+    const coordinates = await getCoordinates(city);
+    const pregnancyVisible = document.getElementById('pregnancyField').style.display !== 'none';
+    const pregnancyValue = document.getElementById('pregnancySelect').value;
+
+    const payload = {
+      name: document.getElementById('donateNameInput').value,
+      age: Number(document.getElementById('donateAgeInput').value),
+      gender: document.getElementById('donateGender').value,
+      cnic: document.getElementById('donateCnicInput').value,
+      weightKg: Number(document.getElementById('donateWeightInput').value),
+      bloodGroup: document.getElementById('donateBloodGroupSelect').value,
+      phone: document.getElementById('donatePhoneInput').value,
+      city,
+      address: document.getElementById('donateAddressInput').value,
+      coordinates,
+      lastDonationDate: document.getElementById('donateLastDonationInput').value || null,
+      eligibility: {
+        chronicIllness,
+        onMedication: document.getElementById('medSelect').value === 'yes',
+        recentSurgeryTattooPiercing: document.getElementById('surgerySelect').value === 'yes',
+        recentTravel: document.getElementById('travelSelect').value === 'yes',
+        recentVaccination: document.getElementById('vaccinationSelect').value === 'yes',
+        pregnantOrBreastfeeding: pregnancyVisible && ['pregnant', 'breastfeeding'].includes(pregnancyValue),
+        alcoholDrugUse48h: document.getElementById('alcoholSelect').value === 'yes'
+      },
+      willingFor: document.querySelector('input[name="willing"]:checked').value === 'rep-only' ? 'replacement-only' : 'any'
+    };
+
+    try {
+      const donor = await api('/api/donors', { method: 'POST', body: payload });
+
+      const previous = localStorage.getItem('bloodsync_donor_id');
+      if (previous && previous !== donor._id) socket.emit('donor:leave', previous);
+      localStorage.setItem('bloodsync_donor_id', donor._id);
+      localStorage.setItem('bloodsync_donor_label', donor.donorId);
+
+      document.getElementById('donorId').textContent = donor.donorId;
+      document.getElementById('donateConfirm').classList.add('show');
+      if (donor.status === 'cooldown') {
+        const until = donor.cooldownUntil ? new Date(donor.cooldownUntil).toLocaleDateString() : 'the end of the 3-month gap';
+        toast(`You’re registered, but you donated recently. You’ll start receiving requests (and be counted on the board) from ${until}.`);
+      }
+      document.getElementById('donateConfirm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      startDonorSession();
+      ensurePush({ prompt: true }); // asks the browser for notification permission
+      loadBoard();                  // show the new donor on the live board straight away
+    } catch (err) {
+      alert(`Could not register: ${err.message}`);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Register as a donor';
+    }
+  });
+
+  // Opened from a notification? Jump to the donor page and show that request.
+  const deepLinkRequestId = (function () {
+    const requestId = new URLSearchParams(location.search).get('requestId');
+    const hashRoute = location.hash.slice(1);
+    if (['about', 'guide', 'urgent', 'contact'].includes(hashRoute)) goTo(hashRoute);
+    if (location.hash === '#donate' || requestId) goTo('donate');
+    if (requestId) history.replaceState(null, '', location.pathname + '#donate');
+    return requestId;
+  })();
+
+  startDonorSession({ openRequestId: deepLinkRequestId });
+
+  // Registered on every visit (not only for donors) so the browser can offer to install BloodSync as an app.
+  if ('serviceWorker' in navigator && window.isSecureContext) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+  // ---------- CONTACT FORM MOCK ----------
+  document.getElementById('contactForm').addEventListener('submit', e => {
+    e.preventDefault();
+    document.getElementById('contactConfirm').classList.add('show');
+    document.getElementById('contactConfirm').scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
+</script>
+
+</body>
+</html>

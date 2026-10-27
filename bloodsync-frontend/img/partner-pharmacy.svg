@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 320" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Medicine capsules and a discount tag">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a2f17"/><stop offset="1" stop-color="#14181c"/></linearGradient></defs>
+  <style>.t{transform-origin:430px 150px;animation:s 3.6s ease-in-out infinite}@keyframes s{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}.c{animation:f 4s ease-in-out infinite}.c2{animation-delay:-2s}@keyframes f{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}@media (prefers-reduced-motion:reduce){.t,.c{animation:none}}text{font-family:Inter,Arial,sans-serif}</style>
+  <rect width="600" height="320" fill="url(#bg)"/>
+  <g class="c"><g transform="translate(150 120) rotate(-35)"><rect x="-70" y="-26" width="140" height="52" rx="26" fill="#f1ede6"/><path d="M0-26h44a26 26 0 0 1 0 52H0Z" fill="#d6302b"/><rect x="-60" y="-16" width="46" height="8" rx="4" fill="#fff" fill-opacity=".6"/></g></g>
+  <g class="c c2"><g transform="translate(250 230) rotate(25)"><rect x="-56" y="-22" width="112" height="44" rx="22" fill="#f1ede6"/><path d="M0-22h34a22 22 0 0 1 0 44H0Z" fill="#1b8a6b"/><rect x="-48" y="-13" width="36" height="7" rx="3.5" fill="#fff" fill-opacity=".6"/></g></g>
+  <g><circle cx="190" cy="240" r="26" fill="#f1ede6"/><path d="M190 214a26 26 0 0 1 0 52Z" fill="#c9a227"/><path d="M164 240h52" stroke="#14181c" stroke-opacity=".25" stroke-width="2"/></g>
+  <g class="t"><path d="M380 70h120a14 14 0 0 1 14 14v100a14 14 0 0 1-14 14H380a14 14 0 0 1-14-14V84a14 14 0 0 1 14-14Z" fill="#c9a227"/><circle cx="392" cy="86" r="7" fill="#14181c"/><text x="440" y="148" font-size="54" font-weight="800" fill="#14181c" text-anchor="middle">20%</text><text x="440" y="176" font-size="15" font-weight="700" fill="#14181c" text-anchor="middle" letter-spacing="2">THANK YOU</text></g>
+</svg>

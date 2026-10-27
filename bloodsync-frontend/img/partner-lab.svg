@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 320" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Laboratory test tubes and a health check mark">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f3a34"/><stop offset="1" stop-color="#14181c"/></linearGradient>
+  <linearGradient id="r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6a5f"/><stop offset="1" stop-color="#8a2622"/></linearGradient>
+  <linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3ccaa0"/><stop offset="1" stop-color="#14705a"/></linearGradient></defs>
+  <style>.bub{animation:u 3s ease-in infinite}.bub.b2{animation-delay:1s}.bub.b3{animation-delay:2s}@keyframes u{0%{transform:translateY(0);opacity:.9}100%{transform:translateY(-50px);opacity:0}}@media (prefers-reduced-motion:reduce){.bub{animation:none}}</style>
+  <rect width="600" height="320" fill="url(#bg)"/>
+  <g stroke="#f1ede6" stroke-opacity=".5" stroke-width="3" fill="none"><path d="M200 70v150a28 28 0 0 0 56 0V70"/><path d="M290 90v130a28 28 0 0 0 56 0V90"/><path d="M380 60v160a28 28 0 0 0 56 0V60"/><path d="M190 70h76M280 90h76M370 60h76" stroke-linecap="round"/></g>
+  <path d="M203 160v60a25 25 0 0 0 50 0v-60Z" fill="url(#r)"/><path d="M293 190v30a25 25 0 0 0 50 0v-30Z" fill="url(#gr)"/><path d="M383 140v80a25 25 0 0 0 50 0v-80Z" fill="url(#r)" fill-opacity=".85"/>
+  <circle class="bub" cx="228" cy="200" r="5" fill="#fff" fill-opacity=".6"/><circle class="bub b2" cx="318" cy="210" r="4" fill="#fff" fill-opacity=".6"/><circle class="bub b3" cx="408" cy="190" r="5" fill="#fff" fill-opacity=".6"/>
+  <g transform="translate(470 210)"><circle r="42" fill="#1b8a6b" stroke="#fff" stroke-width="4"/><path d="M-18 2l12 12 24-28" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 520" role="img" aria-label="All eight blood groups connected through one network">
+  <defs><radialGradient id="g" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#d6302b" stop-opacity=".35"/><stop offset="1" stop-color="#d6302b" stop-opacity="0"/></radialGradient>
+  <linearGradient id="d" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7468"/><stop offset=".55" stop-color="#d6302b"/><stop offset="1" stop-color="#7d1f1c"/></linearGradient>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1c2127"/><stop offset="1" stop-color="#14181c"/></linearGradient></defs>
+  <style>.e{stroke:#f1ede6;stroke-opacity:.28;stroke-width:1.5;stroke-dasharray:4 6;animation:f 2s linear infinite}@keyframes f{to{stroke-dashoffset:-20}}
+  .nd{animation:b 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes b{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+  text{font-family:Inter,Arial,sans-serif}@media (prefers-reduced-motion:reduce){.e,.nd{animation:none}}</style>
+  <rect width="600" height="520" fill="url(#bg)"/><circle cx="300" cy="260" r="250" fill="url(#g)"/>
+  <circle cx="300" cy="260" r="170" fill="none" stroke="#f1ede6" stroke-opacity=".1"/>
+  <g class="e" fill="none"><path d="M300 260L300 90M300 260L420 140M300 260L470 260M300 260L420 380M300 260L300 430M300 260L180 380M300 260L130 260M300 260L180 140"/></g>
+  <g font-size="14" font-weight="700" text-anchor="middle" fill="#fff">
+    <g class="nd" style="animation-delay:0s"><circle cx="300" cy="90" r="30" fill="#2b323a" stroke="#d6302b" stroke-width="2.5"/><text x="300" y="96">O-</text></g>
+    <g class="nd" style="animation-delay:.4s"><circle cx="420" cy="140" r="30" fill="#2b323a" stroke="#d6302b" stroke-width="2.5"/><text x="420" y="146">O+</text></g>
+    <g class="nd" style="animation-delay:.8s"><circle cx="470" cy="260" r="30" fill="#2b323a" stroke="#d6302b" stroke-width="2.5"/><text x="470" y="266">A+</text></g>
+    <g class="nd" style="animation-delay:1.2s"><circle cx="420" cy="380" r="30" fill="#2b323a" stroke="#d6302b" stroke-width="2.5"/><text x="420" y="386">B+</text></g>
+    <g class="nd" style="animation-delay:1.6s"><circle cx="300" cy="430" r="30" fill="#2b323a" stroke="#d6302b" stroke-width="2.5"/><text x="300" y="436">AB+</text></g>
+    <g class="nd" style="animation-delay:2s"><circle cx="180" cy="380" r="30" fill="#2b323a" stroke="#d6302b" stroke-width="2.5"/><text x="180" y="386">AB-</text></g>
+    <g class="nd" style="animation-delay:2.4s"><circle cx="130" cy="260" r="30" fill="#2b323a" stroke="#d6302b" stroke-width="2.5"/><text x="130" y="266">B-</text></g>
+    <g class="nd" style="animation-delay:2.8s"><circle cx="180" cy="140" r="30" fill="#2b323a" stroke="#d6302b" stroke-width="2.5"/><text x="180" y="146">A-</text></g>
+  </g>
+  <path d="M300 196c0 0-44 50-44 86a44 44 0 0 0 88 0c0-36-44-86-44-86Z" fill="url(#d)"/><path d="M280 262c0-16 8-30 20-44-16 14-28 32-28 52 0 8 2 16 5 22-2-9-3-19-3-30Z" fill="#fff" fill-opacity=".4"/>
+</svg>

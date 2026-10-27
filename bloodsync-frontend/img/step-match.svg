@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A requester pin with the nearest matching donors around it">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1c2127"/><stop offset="1" stop-color="#14181c"/></linearGradient>
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#f1ede6" stroke-opacity=".06"/></pattern></defs>
+  <style>.pr{transform-origin:300px 150px;animation:pr 3.4s ease-out infinite;fill:none;stroke:#d6302b;stroke-width:1.5;stroke-dasharray:5 6}.pr.b{animation-delay:1.7s}
+  @keyframes pr{0%{transform:scale(.3);opacity:.9}100%{transform:scale(1.6);opacity:0}}text{font-family:Inter,Arial,sans-serif}
+  @media (prefers-reduced-motion:reduce){.pr{animation:none}}</style>
+  <rect width="600" height="300" fill="url(#bg)"/><rect width="600" height="300" fill="url(#grid)"/>
+  <path d="M0 210C120 190 190 250 330 215S520 160 600 190M120 0C150 90 120 160 190 300M430 0C410 80 470 150 440 300" fill="none" stroke="#f1ede6" stroke-opacity=".1" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="300" cy="150" r="52" fill="none" stroke="#d6302b" stroke-opacity=".45" stroke-dasharray="5 6"/><circle cx="300" cy="150" r="98" fill="none" stroke="#d6302b" stroke-opacity=".28" stroke-dasharray="5 6"/>
+  <circle class="pr" cx="300" cy="150" r="98"/><circle class="pr b" cx="300" cy="150" r="98"/>
+  <path d="M300 150L228 112" stroke="#1b8a6b" stroke-width="2.5" stroke-dasharray="4 5"/>
+  <g font-size="11" font-weight="700" text-anchor="middle"><g fill="#1b8a6b"><circle cx="228" cy="112" r="15"/><circle cx="395" cy="98" r="13" fill-opacity=".55"/><circle cx="410" cy="206" r="13" fill-opacity=".55"/><circle cx="150" cy="214" r="13" fill-opacity=".55"/><circle cx="470" cy="150" r="11" fill-opacity=".35"/></g>
+  <g fill="#fff"><text x="228" y="116">O-</text><text x="395" y="102">A+</text><text x="410" y="210">O-</text><text x="150" y="218">B+</text><text x="470" y="154" font-size="10">AB</text></g></g>
+  <path d="M300 178c-14-18-24-32-24-46a24 24 0 0 1 48 0c0 14-10 28-24 46Z" fill="#d6302b" stroke="#fff" stroke-width="2.5"/><circle cx="300" cy="132" r="8" fill="#fff"/>
+  <g><rect x="190" y="52" width="104" height="28" rx="14" fill="#1b8a6b"/><text x="242" y="71" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">Nearest: 0.8 km</text></g>
+</svg>

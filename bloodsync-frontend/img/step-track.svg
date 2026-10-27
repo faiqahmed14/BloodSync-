@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A donor moving along a route toward the hospital with a live ETA">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1c2127"/><stop offset="1" stop-color="#14181c"/></linearGradient>
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#f1ede6" stroke-opacity=".06"/></pattern></defs>
+  <style>.flow{stroke-dasharray:10 10;animation:flow 1.2s linear infinite}@keyframes flow{to{stroke-dashoffset:-20}}text{font-family:Inter,Arial,sans-serif}
+  .pulse{transform-origin:520px 80px;animation:p 2s ease-out infinite}@keyframes p{0%{transform:scale(.6);opacity:.8}100%{transform:scale(2);opacity:0}}
+  @media (prefers-reduced-motion:reduce){.flow,.pulse{animation:none}}</style>
+  <rect width="600" height="300" fill="url(#bg)"/><rect width="600" height="300" fill="url(#grid)"/>
+  <path d="M0 230C100 200 150 120 270 150S430 60 520 80" fill="none" stroke="#f1ede6" stroke-opacity=".12" stroke-width="16" stroke-linecap="round"/>
+  <path id="route" d="M70 232C130 210 170 130 270 150S430 60 520 80" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-opacity=".9"/>
+  <path d="M70 232C130 210 170 130 270 150S430 60 520 80" class="flow" fill="none" stroke="#d6302b" stroke-width="6" stroke-linecap="round"/>
+  <circle class="pulse" cx="520" cy="80" r="18" fill="#d6302b" fill-opacity=".4"/>
+  <rect x="502" y="62" width="36" height="36" rx="9" fill="#d6302b" stroke="#fff" stroke-width="3"/><path d="M520 70v20M510 80h20" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+  <g><circle r="22" fill="#1b8a6b" fill-opacity=".3"><animateMotion dur="6s" repeatCount="indefinite"><mpath href="#route"/></animateMotion></circle><circle r="10" fill="#1b8a6b" stroke="#fff" stroke-width="3"><animateMotion dur="6s" repeatCount="indefinite"><mpath href="#route"/></animateMotion></circle></g>
+  <g><rect x="52" y="40" width="150" height="54" rx="14" fill="#14181c" stroke="#f1ede6" stroke-opacity=".2"/><text x="68" y="62" font-size="11" fill="#8b93a1">ESTIMATED ARRIVAL</text><text x="68" y="84" font-size="20" font-weight="700" fill="#f1ede6">6 min</text><text x="118" y="84" font-size="12" fill="#8b93a1">· 4.3 km</text></g>
+  <g><rect x="360" y="224" width="190" height="40" rx="12" fill="#14181c" stroke="#1b8a6b" stroke-opacity=".7"/><circle cx="381" cy="244" r="6" fill="#1b8a6b"/><text x="396" y="249" font-size="12" font-weight="600" fill="#f1ede6">Donor is on the way</text></g>
+</svg>

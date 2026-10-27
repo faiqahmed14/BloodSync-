@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BloodSync | Live Tracking</title>
+<meta name="theme-color" content="#d6302b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script src="bloodsync-config.js"></script>
+<script src="bloodsync-shared.js"></script>
+<script src="bloodsync-extras.js"></script>
+<style>
+  :root{
+    --ink:#14181c; --ink-2:#1c2127; --paper:#f1ede6; --red:#d6302b; --green:#1b8a6b;
+    --amber:#c9a227; --muted:#8b93a1; --line:rgba(241,237,230,0.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Inter,Arial,sans-serif;background:var(--ink);color:var(--paper);line-height:1.5;}
+  a{color:inherit;text-decoration:none;}
+  header{height:60px;padding:0 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .logo{font-weight:700;font-size:1.1rem;display:flex;align-items:center;gap:8px;}
+  .logo-mark{width:28px;height:28px;flex:none;filter:drop-shadow(0 2px 8px rgba(226,58,51,.45));animation:markBeat 1.8s ease-in-out infinite;transform-origin:50% 68%;}
+  @keyframes markBeat{0%,100%{transform:scale(1);}14%{transform:scale(1.1);}28%{transform:scale(1);}}
+  @media (prefers-reduced-motion:reduce){.logo-mark{animation:none;}}
+  .back{font-size:.85rem;color:var(--muted);}
+  .back:hover{color:var(--paper);}
+  #status{font-family:'IBM Plex Mono',monospace;font-size:.8rem;padding:6px 12px;border-radius:6px;background:rgba(201,162,39,.15);color:var(--amber);}
+  #status.matched,#status.in-transit,#status.completed{background:rgba(27,138,107,.15);color:var(--green);}
+  #status.cancelled,#status.no-donors-available{background:rgba(214,48,43,.15);color:var(--red);}
+  #layout{display:flex;height:calc(100vh - 60px);}
+  /* isolation:isolate keeps the map's internal layers (very high z-index) from ever painting over the page header */
+  #mapWrap{flex:1;min-width:0;position:relative;z-index:0;isolation:isolate;overflow:hidden;}
+  #map{position:absolute;inset:0;}
+  #sidebar{width:340px;flex-shrink:0;overflow-y:auto;padding:18px;border-left:1px solid var(--line);background:var(--ink-2);}
+  #sidebar h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 10px;}
+  .block{margin-bottom:22px;}
+  .row{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid rgba(241,237,230,.08);font-size:.85rem;}
+  .row span:first-child{color:var(--muted);flex-shrink:0;}
+  .row span:last-child{text-align:right;word-break:break-word;}
+  #banner{display:none;margin-bottom:16px;padding:10px 12px;border-radius:8px;font-size:.82rem;}
+  #banner.warn{display:block;background:rgba(201,162,39,.12);color:var(--amber);border:1px solid rgba(201,162,39,.35);}
+  #banner.err{display:block;background:rgba(214,48,43,.1);color:#ff8a85;border:1px solid rgba(214,48,43,.4);}
+  #banner.info{display:block;background:rgba(27,138,107,.1);color:var(--green);border:1px solid rgba(27,138,107,.4);}
+  #donorCard{display:none;border:1px solid var(--green);background:rgba(27,138,107,.08);border-radius:10px;padding:16px;}
+  #donorCard.show{display:block;}
+  #donorCard h4{color:var(--green);font-size:.9rem;margin-bottom:8px;}
+  .eta{font-family:'IBM Plex Mono',monospace;font-size:1.6rem;color:var(--red);font-weight:600;line-height:1.2;}
+  .eta small{display:block;font-size:.72rem;color:var(--muted);font-weight:400;margin-top:2px;}
+  .contact-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:6px;font-weight:600;font-size:.82rem;border:1px solid transparent;cursor:pointer;font-family:inherit;}
+  .btn-green{background:var(--green);color:#fff;}
+  .btn-outline{border-color:rgba(241,237,230,.3);color:var(--paper);background:transparent;}
+  .btn-outline:hover{border-color:var(--paper);}
+  .btn-danger{border-color:rgba(214,48,43,.6);color:#ff8a85;background:transparent;width:100%;padding:12px;font-size:.88rem;}
+  .btn-danger:hover{background:rgba(214,48,43,.12);}
+  #searchNote{font-size:.82rem;color:var(--muted);line-height:1.5;}
+  #cancelBlock{display:none;}
+  #cancelHint{font-size:.76rem;color:var(--muted);margin-top:8px;}
+  #outcome{display:none;border:1px solid var(--line);border-radius:10px;padding:14px;font-size:.88rem;}
+  #outcome.show{display:block;}
+
+  header{backdrop-filter:blur(12px);}
+  .stepper{display:flex; list-style:none; margin:0 0 22px; padding:0; counter-reset:st;}
+  .stepper li{flex:1; text-align:center; position:relative; font-size:.7rem; color:var(--muted); padding-top:30px; counter-increment:st;}
+  .stepper li::before{content:counter(st); position:absolute; top:0; left:50%; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; background:#2b323a; border:2px solid rgba(241,237,230,.2); display:grid; place-items:center; font-weight:700; font-size:.72rem; color:var(--muted); z-index:1; transition:all .3s;}
+  .stepper li::after{content:""; position:absolute; top:11px; left:-50%; width:100%; height:2px; background:rgba(241,237,230,.15); }
+  .stepper li:first-child::after{display:none;}
+  .stepper li.done{color:var(--paper);} .stepper li.done::before{background:var(--green); border-color:var(--green); color:#fff; content:"\2713";}
+  .stepper li.done::after, .stepper li.now::after{background:var(--green);}
+  .stepper li.now{color:var(--paper); font-weight:700;} .stepper li.now::before{background:var(--red); border-color:var(--red); color:#fff; box-shadow:0 0 0 5px rgba(214,48,43,.22);}
+  .stepper.cancelled li{opacity:.4;}
+  .share-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:14px; font-size:.8rem; color:var(--muted);}
+  .btn-sm{padding:7px 12px; font-size:.76rem;}
+  @media (prefers-reduced-motion:reduce){ .stepper li::before{transition:none;} }
+  @media(max-width:760px){
+    #layout{flex-direction:column;height:auto;}
+    #mapWrap{height:55vh;flex:none;}
+    #sidebar{width:100%;border-left:none;border-top:1px solid var(--line);}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><svg class="logo-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2C12 2.2 5 10 5 15a7 7 0 0014 0c0-5-7-12.8-7-12.8z" fill="#e23a33"/><path d="M8.5 15.5h2l1.2-2.4 1.6 4 1.2-1.6h1.5" fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>BloodSync | Live Tracking</div>
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <a class="back" href="index.html">← Back to BloodSync</a>
+    <div id="status">Loading…</div>
+  </div>
+</header>
+
+<div id="layout">
+  <div id="mapWrap">
+    <div id="map"></div>
+  </div>
+
+  <aside id="sidebar">
+    <div id="banner" role="status"></div>
+
+    <ol class="stepper" id="stepper" aria-label="Request progress">
+      <li data-s="0">Searching</li><li data-s="1">Accepted</li><li data-s="2">On the way</li><li data-s="3">Done</li>
+    </ol>
+
+    <div class="block">
+      <h3>Request</h3>
+      <div id="reqRows"></div>
+      <p id="searchNote" style="margin-top:12px;display:none;">Nearby donors are being alerted right now. Once one accepts, their details and live location appear here.</p>
+    </div>
+
+    <div class="block" id="donorCard">
+      <h4>✓ A donor accepted your request</h4>
+      <div class="row"><span>Donor</span><span id="dName">N/A</span></div>
+      <div class="row"><span>Blood group</span><span id="dGroup">N/A</span></div>
+      <div class="row"><span>Contact</span><span id="dPhone">N/A</span></div>
+      <div class="contact-actions" id="dActions"></div>
+      <div style="margin-top:16px;">
+        <div class="eta" id="eta">N/A<small id="etaSub"></small></div>
+      </div>
+      <div class="row" style="margin-top:10px;"><span>Distance left</span><span id="dist">N/A</span></div>
+      <div class="row"><span>Location updated</span><span id="locAge">waiting for donor's GPS…</span></div>
+    </div>
+
+    <div class="block" id="outcome"></div>
+
+    <div class="block" id="shareBlock">
+      <h3>Spread the word</h3>
+      <div class="share-row" id="shareRow">
+        <button type="button" class="btn btn-outline btn-sm" data-share="whatsapp">WhatsApp</button>
+        <button type="button" class="btn btn-outline btn-sm" data-share="copy">Copy message</button>
+        <button type="button" class="btn btn-outline btn-sm" data-share="native">More options</button>
+      </div>
+    </div>
+
+    <div class="block" id="cancelBlock">
+      <button type="button" class="btn btn-danger" id="cancelBtn">Cancel My Request</button>
+      <p id="cancelHint">Use this if no donor turned up, blood was arranged locally, or it's no longer needed.</p>
+    </div>
+  </aside>
+</div>
+
+<script>
+(function () {
+  const { api, esc, telHref, waHref, fmtDistance, fmtDuration, haversineMeters, validCoords,
+          CANCEL_REASON_LABELS, openCancelDialog, getMyToken, saveMyRequest, clearActiveRequest } = BloodSync;
+  const API_BASE = BloodSync.API_BASE;
+
+  const params = new URLSearchParams(location.search);
+  const REQUEST_ID = params.get('requestId');
+  const $ = (id) => document.getElementById(id);
+
+  if (!REQUEST_ID) {
+    $('status').textContent = 'No request selected';
+    $('reqRows').innerHTML = '<p style="color:var(--muted);font-size:.9rem;">Open this page from BloodSync after submitting a request.</p>';
+    return;
+  }
+
+  // The index page hands over the cancel token in the URL hash right after creating the
+  // request. Keep it in this browser's storage and scrub it from the address bar.
+  if (location.hash.startsWith('#k=')) {
+    saveMyRequest(REQUEST_ID, decodeURIComponent(location.hash.slice(3)));
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+
+  const STATUS_LABELS = {
+    searching: 'Searching nearest donors…',
+    matched: 'Donor accepted, getting ready',
+    'in-transit': 'Donor is on the way',
+    completed: 'Donation completed ✓',
+    cancelled: 'Request cancelled',
+    'no-donors-available': 'No donors available right now'
+  };
+  const FINAL = ['completed', 'cancelled'];
+  const ACTIVE = ['searching', 'matched', 'in-transit', 'no-donors-available'];
+
+  let req = null;            // latest request from the server
+  let hospitalPos = null;    // [lng, lat]
+  let donorPos = null;       // [lng, lat]
+  let donorUpdatedAt = null;
+  let lastRoute = { at: 0, from: null, busy: false };
+  let fallbackEta = null;    // minutes, from the server's first estimate
+  let pollTimer = null;
+
+  // ---------- Map (Google Maps, created asynchronously) ----------
+  // The page works without the map (if the key is missing or Google can't load, the box says so);
+  // markers and the route are simply drawn as soon as the map is ready.
+  let map = null, hospitalMarker = null, donorMarker = null, searchRing = null, pulseTimer = null;
+  let lastRouteData = null;
+  BloodSync.createMap($('map'), { center: [69.3451, 30.3753], zoom: 5 })
+    .then((m) => { map = m; syncMap(); })
+    .catch((err) => BloodSync.showMapError($('map'), err));
+
+  // Puts whatever we already know (hospital, donor, route) onto the map.
+  function syncMap() {
+    if (!map) return;
+    if (hospitalPos && !hospitalMarker && req) {
+      hospitalMarker = map.addMarker('hospital', hospitalPos, {
+        title: req.hospital.name, infoHtml: `<b>${esc(req.hospital.name)}</b><br>${esc(req.hospital.area)}`
+      });
+      map.setView(hospitalPos, 14);
+      if (req.status === 'searching') startSearchPulse();
+    }
+    if (donorPos) {
+      if (!donorMarker) donorMarker = map.addMarker('donor', donorPos, { title: 'Your donor', infoHtml: '<b>Your donor</b>' });
+      else donorMarker.setPosition(donorPos);
+    }
+    if (lastRouteData) drawRouteOnMap();
+  }
+
+  function drawRouteOnMap() {
+    if (!map || !lastRouteData) return;
+    map.showRoute(lastRouteData);
+    // Frame the whole route the first time, and again whenever the donor has moved out of view
+    // (never while the donor is visible, so the requester can still pan and zoom freely).
+    const donorVisible = donorMarker && map.isVisible(donorMarker.getPosition());
+    if (!lastRoute.fitted || !donorVisible) { map.fitRoute(50); lastRoute.fitted = true; }
+  }
+
+  function setBanner(kind, text) {
+    const b = $('banner');
+    if (!kind) { b.className = ''; b.textContent = ''; b.style.display = 'none'; return; }
+    b.className = kind; b.style.display = 'block'; b.textContent = text;
+  }
+
+  // ---------- Rendering ----------
+  function renderRequest() {
+    const r = req;
+    const group = r.type === 'direct-need' ? r.bloodGroup : 'Any compatible group';
+    $('reqRows').innerHTML = `
+      <div class="row"><span>Request</span><span>${esc(r.requestId)}</span></div>
+      <div class="row"><span>Blood group</span><span>${esc(group)}</span></div>
+      <div class="row"><span>Units</span><span>${esc(r.unitsRequired)}</span></div>
+      <div class="row"><span>Hospital</span><span>${esc(r.hospital.name)}, ${esc(r.hospital.area)}</span></div>
+      <div class="row"><span>Reason</span><span>${esc(r.reason)}</span></div>`;
+  }
+
+  function renderStatus() {
+    const s = req.status;
+    $('status').textContent = STATUS_LABELS[s] || s;
+    $('status').className = s;
+    $('searchNote').style.display = s === 'searching' ? 'block' : 'none';
+    const stage = { searching: 0, 'no-donors-available': 0, matched: 1, 'in-transit': 2, completed: 3 }[s];
+    $('stepper').classList.toggle('cancelled', s === 'cancelled');
+    document.querySelectorAll('#stepper li').forEach((li, i) => {
+      li.classList.toggle('done', stage !== undefined && (i < stage || (s === 'completed' && i === 3)));
+      li.classList.toggle('now', stage !== undefined && i === stage && s !== 'completed');
+    });
+    $('shareBlock').style.display = ACTIVE.includes(s) ? 'block' : 'none';
+
+    const donor = req.acceptedDonorId && typeof req.acceptedDonorId === 'object' ? req.acceptedDonorId : null;
+    const showDonor = donor && (s === 'matched' || s === 'in-transit' || s === 'completed');
+    $('donorCard').classList.toggle('show', !!showDonor);
+    if (donor) {
+      $('dName').textContent = donor.name || 'N/A';
+      $('dGroup').textContent = donor.bloodGroup || 'N/A';
+      $('dPhone').textContent = donor.phone || 'N/A';
+      $('dActions').innerHTML = donor.phone
+        ? `<a class="btn btn-green" href="${esc(telHref(donor.phone))}">📞 Call donor</a>
+           <a class="btn btn-outline" href="${esc(waHref(donor.phone))}" target="_blank" rel="noopener">WhatsApp</a>`
+        : '';
+    }
+
+    // Cancel button: only while the request is still live, and only in the browser that created it.
+    const canCancel = ACTIVE.includes(s);
+    const mine = !!getMyToken(REQUEST_ID);
+    $('cancelBlock').style.display = canCancel ? 'block' : 'none';
+    $('cancelBtn').style.display = mine ? 'block' : 'none';
+    $('cancelHint').textContent = mine
+      ? "Use this if no donor turned up, blood was arranged locally, or it's no longer needed."
+      : 'Only the browser that created this request can cancel it.';
+
+    const out = $('outcome');
+    out.className = 'block';
+    if (s === 'cancelled') {
+      const label = CANCEL_REASON_LABELS[req.cancelReason] || 'Cancelled';
+      out.innerHTML = `<strong>This request was cancelled.</strong><br><span style="color:var(--muted)">${esc(label)}${req.cancelNote ? ': ' + esc(req.cancelNote) : ''}</span>`;
+      out.classList.add('show');
+    } else if (s === 'completed') {
+      out.innerHTML = '<strong>The donation is complete.</strong><br><span style="color:var(--muted)">Thank you for using BloodSync.</span>';
+      out.classList.add('show');
+    } else if (s === 'no-donors-available') {
+      out.innerHTML = '<strong>No eligible donors were found nearby.</strong><br><span style="color:var(--muted)">You can cancel this request and try again, or keep it open.</span>';
+      out.classList.add('show');
+    } else {
+      out.innerHTML = '';
+    }
+
+    if (searchRing && s !== 'searching') stopSearchPulse();
+    if (FINAL.includes(s)) {
+      clearActiveRequest(REQUEST_ID);
+      stopPolling();
+    }
+  }
+
+  function startSearchPulse() {
+    if (!map || !hospitalPos || searchRing) return;
+    searchRing = map.addPulse(hospitalPos, 800);
+    let growing = true;
+    pulseTimer = setInterval(() => {
+      const r = searchRing.getRadius();
+      searchRing.setRadius(growing ? r + 60 : r - 60);
+      if (r > 1400) growing = false;
+      if (r < 800) growing = true;
+    }, 300);
+  }
+  function stopSearchPulse() {
+    clearInterval(pulseTimer);
+    if (searchRing) { searchRing.remove(); searchRing = null; }
+  }
+
+  function placeHospital() { syncMap(); }
+
+  function setDonorPosition(coords, updatedAt) {
+    if (!validCoords(coords)) return;
+    donorPos = coords;
+    donorUpdatedAt = updatedAt ? new Date(updatedAt) : new Date();
+    syncMap();
+    refreshRoute();
+    renderLocAge();
+  }
+
+  function renderLocAge() {
+    if (!donorUpdatedAt) return;
+    const sec = Math.max(0, Math.round((Date.now() - donorUpdatedAt.getTime()) / 1000));
+    $('locAge').textContent = sec < 5 ? 'just now' : sec < 90 ? `${sec} s ago` : `${Math.round(sec / 60)} min ago`;
+  }
+  setInterval(renderLocAge, 1000);
+
+  // Shortest route donor -> hospital. Re-fetched at most every 15 s unless the donor moved a lot.
+  async function refreshRoute(force) {
+    if (!donorPos || !hospitalPos || !req || FINAL.includes(req.status)) return;
+    const moved = lastRoute.from ? haversineMeters(lastRoute.from, donorPos) : Infinity;
+    if (!force && (lastRoute.busy || (Date.now() - lastRoute.at < 15000 && moved < 250))) return;
+    lastRoute.busy = true;
+    try {
+      const route = await BloodSync.fetchRoute(donorPos, hospitalPos);
+      lastRoute.at = Date.now();
+      lastRoute.from = donorPos;
+      lastRouteData = route;
+      drawRouteOnMap();
+      $('eta').firstChild.textContent = fmtDuration(route.shortest.durationSeconds);
+      $('etaSub').textContent = route.source !== 'straight-line' ? 'to reach the hospital' : 'approximate (straight line)';
+      $('dist').textContent = fmtDistance(route.shortest.distanceMeters);
+    } catch (err) {
+      console.warn('Route update failed:', err.message);
+      if (donorPos && hospitalPos) {
+        $('dist').textContent = fmtDistance(haversineMeters(donorPos, hospitalPos)) + ' (straight line)';
+      }
+    } finally {
+      lastRoute.busy = false;
+    }
+  }
+
+  function applyRequest(r) {
+    req = r;
+    if (validCoords(r.location && r.location.coordinates)) hospitalPos = r.location.coordinates;
+    renderRequest();
+    placeHospital();
+    renderStatus();
+    const loc = r.donorCurrentLocation;
+    if (loc && validCoords(loc.coordinates) && (r.status === 'matched' || r.status === 'in-transit')) {
+      setDonorPosition(loc.coordinates, loc.updatedAt);
+    } else if (fallbackEta && (r.status === 'matched' || r.status === 'in-transit') && !donorPos) {
+      $('eta').firstChild.textContent = `~${fallbackEta} min`;
+      $('etaSub').textContent = 'estimate until the donor’s GPS connects';
+    }
+  }
+
+  // ---------- Loading + live updates ----------
+  async function loadRequest() {
+    let data;
+    try {
+      data = await api(`/api/requests/${REQUEST_ID}`);
+    } catch (err) {
+      // Only a genuine network failure means "can't reach the server".
+      if (err.network) setBanner('warn', 'Connection to BloodSync lost. Retrying automatically…');
+      else setBanner('err', err.message);
+      if (!req) $('status').textContent = err.status === 404 ? 'Request not found' : 'Connecting…';
+      return;
+    }
+    setBanner(null);
+    try {
+      applyRequest(data);
+    } catch (err) {
+      console.error('Could not display request:', err);
+      setBanner('err', 'Something went wrong while drawing this page. Try refreshing.');
+    }
+  }
+
+  function startPolling() { pollTimer = setInterval(loadRequest, 10000); }
+  function stopPolling() { clearInterval(pollTimer); pollTimer = null; }
+
+  {
+    const socket = BloodSync.createSocket();
+    socket.on('connect', () => { socket.emit('request:join', REQUEST_ID); loadRequest(); });
+    socket.on('request:matched', (p) => {
+      fallbackEta = p.etaMinutes || null;
+      loadRequest(); // pulls the donor's details with the current status
+    });
+    socket.on('request:status', (p) => {
+      if (p.status === 'cancelled') { loadRequest(); return; }
+      if (req) { req.status = p.status; renderStatus(); }
+      loadRequest();
+    });
+    socket.on('request:location', (p) => setDonorPosition(p.coordinates, p.updatedAt));
+  }
+
+  $('cancelBtn').addEventListener('click', () =>
+    openCancelDialog({ requestId: REQUEST_ID, onCancelled: () => loadRequest() })
+  );
+
+  BloodSync.extras.wireShare($('shareRow'), () => {
+    if (!req) return '';
+    return BloodSync.logic.buildShareText({ type: req.type, bloodGroup: req.bloodGroup, units: req.unitsRequired, hospitalName: req.hospital.name, hospitalArea: req.hospital.area, contact: req.requester && req.requester.contact, origin: location.origin.replace(/\/$/, '') });
+  }, (msg) => setBanner('info', msg));
+
+  loadRequest();
+  startPolling();
+})();
+</script>
+</body>
+</html>
